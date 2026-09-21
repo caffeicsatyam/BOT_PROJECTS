@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Products Studio – Black Orange Talent</title>
-  <meta name="description" content="Black Orange Talent AI Products Studio: AI Story Generator and AI Comic Book Generator." />
+  <title>AI Products Studio – BLACK ORANGE TALENT PVT.LMT</title>
+  <meta name="description" content="BLACK ORANGE TALENT PVT.LMT AI Products Studio: AI Story Generator and AI Comic Book Generator." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet" />
@@ -22,7 +22,7 @@
         </button>
         <a href="/" class="nav-brand">
           <span class="brand-icon">🎨</span>
-          <span class="brand-text">Comic Studio</span>
+          <span class="brand-text">BLACK ORANGE TALENT PVT.LMT</span>
         </a>
         <span class="badge-pill-header">AI Products Studio</span>
       </div>
@@ -34,155 +34,189 @@
     </div>
   </header>
 
-  <!-- ─── WORKSPACE LAYOUT ─── -->
-  <div class="workspace-wrapper">
+  <!-- Mobile Drawer Backdrop -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-    <!-- Mobile Drawer Backdrop -->
-    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <!-- ─── 3-COLUMN WORKSPACE CONTAINER ─── -->
+  <div class="workspace-wrapper three-column-layout">
 
-    <!-- ─── SIDEBAR: PRODUCTS ─── -->
+    <!-- ─── COLUMN 1 (LEFT): PRODUCT SIDEBAR ─── -->
     <aside class="projects-sidebar" id="projectsSidebar">
-      <div class="sidebar-header">
-        <div class="sidebar-title-row">
-          <span class="sidebar-title">
-            <span>📦</span> Products
-          </span>
-          <span class="project-count-badge" id="projectCountBadge">2</span>
+      <!-- Distinct "PRODUCT" Box Header with Robot at Left Top Corner -->
+      <div class="product-box-container">
+        <div class="sidebar-robot-banner">
+          <img src="/static/robot_hero.jpg" alt="Edu-Bot AI Assistant" class="sidebar-robot-img" />
+          <div class="sidebar-robot-text">
+            <span class="sidebar-robot-name">Edu-Bot AI</span>
+            <span class="sidebar-robot-badge"><span class="pulse-dot"></span> Online Assistant</span>
+          </div>
         </div>
-
-        <div class="product-tree-bar">
-          <span class="tree-label">📁 product</span>
+        <div class="product-sketch-box">
+          <span class="box-title">PRODUCT</span>
         </div>
       </div>
 
-      <!-- Products Nav List: Exactly 2 items -->
+      <!-- Products Navigation List: Product 1 Name, Product 2 Name -->
       <nav class="sidebar-list" id="sidebarList">
-        <!-- Rendered via projects.js:
+        <!-- Rendered by projects.js:
              1. AI Story Generator
              2. AI Comic Book Generator
         -->
       </nav>
 
       <div class="sidebar-footer">
-        <span>Black Orange Talent</span>
+        <span>BLACK ORANGE TALENT</span>
         <a href="/">Dashboard ↗</a>
       </div>
     </aside>
 
-    <!-- ─── WORKSPACE: SHIFTING PRODUCT PANE ─── -->
-    <main class="workspace-main">
-      <div class="panes-viewport">
+    <!-- ─── COLUMN 2 (MIDDLE): STORY DISPLAY & PREVIEW PANE ─── -->
+    <main class="story-middle-pane" id="storyMiddlePane">
+      <div class="story-middle-content" id="activeStoryPane">
 
-        <div class="story-view-pane" id="activeStoryPane">
-
-          <!-- ── PRODUCT HEADER ── -->
-          <div class="pane-header">
-            <div class="pane-header-info">
-              <div class="pane-breadcrumb">
-                <a href="/">Dashboard</a> / <a href="/products">Products</a> / <span id="breadCrumbTitle">AI Story Generator</span>
-              </div>
-              <div class="pane-title-row">
-                <span class="pane-icon" id="storyHeaderIcon">📖</span>
-                <h1 class="pane-title" id="storyHeaderTitle">AI Story Generator</h1>
-                <span class="pane-tag" id="storyHeaderTopic" style="background:rgba(255,123,46,0.15); color:var(--accent); border-color:rgba(255,123,46,0.3);">Product: AI Story</span>
-              </div>
-              <p class="pane-desc" id="storyHeaderDesc">
-                Transform any topic into an imaginative narrative story with chapter storytelling, character traits, and meaningful morals.
-              </p>
-              <div class="pane-tags" id="headerTagsContainer">
-                <span class="pane-tag">Gemini AI</span>
-                <span class="pane-tag">Interactive Revisions</span>
-                <span class="pane-tag">School Safe</span>
-              </div>
+        <!-- ── STORY / PRODUCT HEADER ── -->
+        <div class="pane-header">
+          <div class="pane-header-info">
+            <div class="pane-breadcrumb">
+              <a href="/">Dashboard</a> / <a href="/products">Products</a> / <span id="breadCrumbTitle">AI Story Generator</span>
             </div>
-            <div class="pane-header-actions">
-              <button id="copyStoryBtn" class="btn btn-ghost btn-sm">📋 Copy Output</button>
-              <button id="downloadStoryBtn" class="btn btn-ghost btn-sm">💾 Download .txt</button>
+            <div class="pane-title-row">
+              <span class="pane-icon" id="storyHeaderIcon">📖</span>
+              <h1 class="pane-title" id="storyHeaderTitle">AI Story Generator</h1>
+              <span class="pane-tag" id="storyHeaderTopic">Product: AI Story</span>
+            </div>
+            <p class="pane-desc" id="storyHeaderDesc">
+              Transform any topic into an imaginative narrative story with chapter storytelling, character traits, and meaningful morals.
+            </p>
+            <div class="pane-tags" id="headerTagsContainer">
+              <span class="pane-tag">Gemini AI</span>
+              <span class="pane-tag">Interactive Revisions</span>
+              <span class="pane-tag">School Safe</span>
             </div>
           </div>
+          <div class="pane-header-actions">
+            <button id="copyStoryBtn" class="btn btn-ghost btn-sm">📋 Copy Output</button>
+            <button id="downloadStoryBtn" class="btn btn-ghost btn-sm">💾 Download .txt</button>
+          </div>
+        </div>
 
-          <!-- ── GENERATOR TOOLBAR ── -->
-          <div class="workspace-card">
-            <div class="card-title-bar">
-              <h3 id="generatorCardTitle"><span>⚡</span> Generate or Update</h3>
-              <span id="genStatus" style="font-size:0.85rem; color:var(--text-dim);">Ready</span>
-            </div>
-
-            <!-- Quick prompt ideas -->
-            <div class="prompt-chips" id="promptChipsContainer">
-              <span class="chip-label">Try Topics:</span>
-              <!-- Dynamically populated per product -->
-            </div>
-
-            <div class="input-row">
-              <input type="text" id="topicInput" class="app-input" placeholder="Enter a topic..." />
-              <button id="generateBtn" class="btn btn-primary">
-                <span id="generateBtnText">🚀 Generate Story</span>
-              </button>
-            </div>
+        <!-- ── PREVIEW & STORY CONTENT CARD ── -->
+        <div class="workspace-card main-output-card">
+          <div class="card-title-bar">
+            <h3 id="previewCardTitle"><span>🎭</span> Story Output Preview</h3>
+            <span id="wordCountBadge" style="font-size:0.82rem; color:var(--text-dim);">0 words</span>
           </div>
 
-          <!-- ── PREVIEW & VISUALIZER ── -->
-          <div class="workspace-card">
-            <div class="card-title-bar">
-              <h3 id="previewCardTitle"><span>🎭</span> Output Preview</h3>
-              <span id="wordCountBadge" style="font-size:0.82rem; color:var(--text-dim);">0 words</span>
-            </div>
-
-            <!-- Visual Characters & Panels -->
-            <div class="comic-display-grid">
-              <!-- Character cast -->
-              <div class="characters-card">
-                <div class="characters-title">👥 Character Cast</div>
-                <div class="character-pills" id="characterPillsContainer">
-                  <!-- Populated by JS -->
-                </div>
-              </div>
-
-              <!-- Panels / Chapter Cards Grid -->
-              <div class="comic-panels-grid" id="comicPanelsContainer">
+          <!-- Visual Characters & Panels Grid -->
+          <div class="comic-display-grid">
+            <!-- Character Cast -->
+            <div class="characters-card">
+              <div class="characters-title">👥 Character Cast</div>
+              <div class="character-pills" id="characterPillsContainer">
                 <!-- Populated by JS -->
               </div>
-
-              <!-- Moral banner -->
-              <div class="moral-box" id="moralBox">
-                <span class="moral-icon">🌟</span>
-                <div>
-                  <strong style="color:var(--accent); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.06em; display:block;">Moral Lesson</strong>
-                  <span class="moral-text" id="moralText">Kindness and courage are the greatest powers.</span>
-                </div>
-              </div>
             </div>
 
-            <!-- ── SCRIPT EDITOR ── -->
-            <div class="story-output-wrapper">
-              <div class="story-meta-bar">
-                <span class="story-badge" id="editorBadgeLabel">📝 Complete Content &amp; Editor</span>
-                <span style="font-size:0.78rem; color:var(--text-dim);">Edit directly below anytime</span>
-              </div>
-              <textarea id="storyScriptBox" class="story-box" placeholder="Generated content will appear here..."></textarea>
+            <!-- Chapters / Comic Panels Grid -->
+            <div class="comic-panels-grid" id="comicPanelsContainer">
+              <!-- Populated by JS -->
             </div>
 
-            <!-- ── AI REVISION ASSISTANT ── -->
-            <div class="revision-panel">
-              <h4><span>🔄</span> AI Revision Assistant</h4>
-              <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:12px;">
-                Ask the AI to adjust characters, twist the narrative, or enhance scenes while preserving the rest of your creation.
-              </p>
-              <div class="input-row" style="margin-bottom:0;">
-                <input type="text" id="revisionInput" class="app-input" placeholder="e.g. 'Add a humorous dialogue', 'Change setting to ancient space station'..." />
-                <button id="reviseBtn" class="btn btn-ghost">
-                  <span>🔄</span> Apply Revision
-                </button>
+            <!-- Moral Banner -->
+            <div class="moral-box" id="moralBox">
+              <span class="moral-icon">🌟</span>
+              <div>
+                <strong style="color:var(--accent); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.06em; display:block;">Moral Lesson</strong>
+                <span class="moral-text" id="moralText">Kindness and courage are the greatest powers.</span>
               </div>
             </div>
+          </div>
 
+          <!-- ── COMPLETE SCRIPT & EDITOR ── -->
+          <div class="story-output-wrapper">
+            <div class="story-meta-bar">
+              <span class="story-badge" id="editorBadgeLabel">📝 Complete Content &amp; Editor</span>
+              <span style="font-size:0.78rem; color:var(--text-dim);">Edit directly below anytime</span>
+            </div>
+            <textarea id="storyScriptBox" class="story-box" placeholder="Generated story content will appear here..."></textarea>
           </div>
 
         </div>
 
       </div>
     </main>
+
+    <!-- ─── COLUMN 3 (RIGHT): ROUNDED CAPSULE GENERATOR PANEL ─── -->
+    <aside class="generator-right-capsule" id="generatorRightCapsule">
+      <div class="capsule-inner-frame">
+        
+        <!-- Capsule Header -->
+        <div class="capsule-header">
+          <div class="capsule-header-row">
+            <span class="capsule-badge">AI Engine</span>
+            <span id="genStatus" class="capsule-status">Ready</span>
+          </div>
+          <h3 id="generatorCardTitle" class="capsule-title">
+            <span>⚡</span> AI Story Studio
+          </h3>
+          <p class="capsule-subtitle" id="capsuleSubtitle">
+            Enter a prompt or choose a topic to craft your story.
+          </p>
+        </div>
+
+        <!-- Capsule Scrollable Content -->
+        <div class="capsule-body">
+          
+          <!-- Topic Input Section -->
+          <div class="capsule-field-group">
+            <label class="capsule-label" for="topicInput">
+              <span>💡</span> Story Topic &amp; Idea
+            </label>
+            <textarea
+              id="topicInput"
+              class="capsule-textarea"
+              rows="4"
+              placeholder="Enter a story topic (e.g. 'A secret garden hidden behind an old library clock')..."
+            ></textarea>
+          </div>
+
+          <!-- Quick Topic Chips -->
+          <div class="capsule-field-group">
+            <span class="capsule-label">
+              <span>✨</span> Try Prompts
+            </span>
+            <div class="prompt-chips" id="promptChipsContainer">
+              <!-- Dynamically populated per product -->
+            </div>
+          </div>
+
+          <!-- AI Revision Assistant -->
+          <div class="capsule-field-group capsule-revision-group">
+            <label class="capsule-label" for="revisionInput">
+              <span>🔄</span> Revise &amp; Twist
+            </label>
+            <input
+              type="text"
+              id="revisionInput"
+              class="app-input capsule-input-sm"
+              placeholder="e.g. 'Add a curious cat sidekick'..."
+            />
+            <button id="reviseBtn" class="btn btn-ghost btn-sm btn-block" style="margin-top: 8px;">
+              <span>🔄</span> Apply Revision
+            </button>
+          </div>
+
+        </div>
+
+        <!-- ── DISTINCT BOTTOM ACTION BUTTON (as per sketch: [GENERATE STORY]) ── -->
+        <div class="capsule-bottom-action">
+          <button id="generateBtn" class="btn-generate-capsule">
+            <span id="generateBtnText">GENERATE STORY</span>
+          </button>
+        </div>
+
+      </div>
+    </aside>
 
   </div>
 

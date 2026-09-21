@@ -26,7 +26,7 @@
       badge: "Narrative Storytelling",
       desc: "Transform any topic into an imaginative narrative story with chapter storytelling, rich character traits, and meaningful morals.",
       tags: ["Gemini AI", "Story Chapters", "Character Arcs", "School Safe"],
-      btnText: "🚀 Generate Story",
+      btnText: "GENERATE STORY",
       placeholder: "Enter a story topic (e.g. 'A secret garden hidden behind an old library clock')...",
       chips: [
         { label: "🕰️ Whispering Clock", prompt: "A magical grandfather clock in the library that whispers forgotten historical mysteries" },
@@ -89,7 +89,7 @@ Patience and attentive curiosity reveal the wonder hidden in ordinary places.`
       badge: "Comic Studio • Panels & SFX",
       desc: "Convert imaginative ideas into action-packed comic book scripts complete with panel descriptions, sound effects (BAM! WHOOSH!), dialogues, and visual scenes.",
       tags: ["Gemini AI", "Comic Panels", "Sound Effects (SFX)", "School Safe"],
-      btnText: "⚡ Generate Comic Book",
+      btnText: "GENERATE COMIC",
       placeholder: "Enter a comic book topic (e.g. 'A friendly robot joins the school soccer team')...",
       chips: [
         { label: "🤖 Robot at School", prompt: "A curious robot attends its first day at elementary school and helps in science class" },
@@ -187,6 +187,7 @@ True friendship means sharing knowledge and lifting each other up.`
   const headerTagsContainer = $("#headerTagsContainer");
 
   const generatorCardTitle = $("#generatorCardTitle");
+  const capsuleSubtitle = $("#capsuleSubtitle");
   const promptChipsContainer = $("#promptChipsContainer");
   const topicInput = $("#topicInput");
   const generateBtn = $("#generateBtn");
@@ -329,7 +330,12 @@ True friendship means sharing knowledge and lifting each other up.`
 
     // Generator Toolbar configuration
     if (generatorCardTitle) {
-      generatorCardTitle.innerHTML = `<span>⚡</span> ${prod.name} Workspace`;
+      generatorCardTitle.innerHTML = `<span>⚡</span> ${prod.name}`;
+    }
+    if (capsuleSubtitle) {
+      capsuleSubtitle.textContent = prod.productType === "story"
+        ? "Enter a prompt or choose a topic to craft your story."
+        : "Enter a prompt or choose a topic to script your comic book.";
     }
     if (topicInput) {
       topicInput.placeholder = prod.placeholder;

@@ -79,84 +79,264 @@ body.projects-page {
   text-transform: uppercase;
 }
 
-/* ── MAIN WORKSPACE CONTAINER ── */
-.workspace-wrapper {
-  display: flex;
-  flex: 1;
-  min-height: calc(100vh - 64px);
-  position: relative;
+/* ── 3-COLUMN WORKSPACE CONTAINER (Matches User Sketch) ── */
+.workspace-wrapper.three-column-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 380px;
+  grid-template-rows: 100%;
+  grid-template-areas: "sidebar middle right";
+  height: calc(100vh - 64px);
+  max-height: calc(100vh - 64px);
   overflow: hidden;
+  gap: 18px;
+  padding: 16px 20px;
+  background: var(--workspace-bg);
+  box-sizing: border-box;
 }
 
-/* ── SIDEBAR ── */
+/* ── COLUMN 1 (LEFT): PRODUCT SIDEBAR ── */
 .projects-sidebar {
-  width: var(--sidebar-w);
-  min-width: var(--sidebar-w);
+  grid-area: sidebar;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
   background: var(--sidebar-bg);
-  border-right: 1px solid var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s ease;
-  z-index: 50;
-  height: calc(100vh - 64px);
-  position: sticky;
-  top: 64px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  z-index: 20;
+  box-sizing: border-box;
 }
 
-.sidebar-header {
-  padding: 20px 18px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+/* Distinct "PRODUCT" Sketch Box */
+.product-box-container {
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.sidebar-title-row {
+.product-sketch-box {
+  border: 2px solid var(--text);
+  border-radius: 6px;
+  padding: 12px 14px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.product-sketch-box .box-title {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  font-size: 0.96rem;
+  color: var(--text);
+}
+
+.sidebar-list {
+  flex: 1;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+/* ── COLUMN 2 (MIDDLE): STORY DISPLAY & PREVIEW PANE ── */
+.story-middle-pane {
+  grid-area: middle;
+  height: 100%;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(14, 14, 22, 0.6);
+  padding: 20px 24px 40px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+}
+
+.story-middle-pane::-webkit-scrollbar {
+  width: 6px;
+}
+.story-middle-pane::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.main-output-card {
+  margin-top: 16px;
+}
+
+/* ── COLUMN 3 (RIGHT): ROUNDED CAPSULE GENERATOR PANEL ── */
+.generator-right-capsule {
+  grid-area: right;
+  width: 100%;
+  height: 100%;
+  border-radius: 40px; /* Distinctive capsule rounded curve from sketch */
+  border: 2px solid rgba(255, 123, 46, 0.45);
+  background: linear-gradient(175deg, rgba(24, 20, 30, 0.96) 0%, rgba(16, 14, 22, 0.98) 100%);
+  box-shadow: 0 16px 40px -8px rgba(255, 123, 46, 0.15), 0 8px 30px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.capsule-inner-frame {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 24px 20px 20px;
+}
+
+.capsule-header {
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.capsule-header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
-.sidebar-title {
-  font-size: 0.92rem;
+.capsule-badge {
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: rgba(255, 123, 46, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(255, 123, 46, 0.3);
+}
+
+.capsule-status {
+  font-size: 0.78rem;
   color: var(--text-dim);
+}
+
+.capsule-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.capsule-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.capsule-body {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.capsule-body::-webkit-scrollbar {
+  width: 4px;
+}
+.capsule-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+}
+
+.capsule-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.capsule-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text);
   display: flex;
   align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.capsule-textarea {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 90px;
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.capsule-textarea:focus {
+  border-color: var(--accent);
+}
+
+.capsule-input-sm {
+  font-size: 0.84rem;
+  padding: 8px 12px;
+}
+
+.capsule-revision-group button {
+  padding: 10px 14px;
+  font-size: 0.84rem;
+  line-height: 1.2;
+}
+
+/* Distinct Bottom Action Button Box (sketch: [GENERATE STORY]) */
+.capsule-bottom-action {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn-generate-capsule {
+  width: 100%;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #ff7b2e 0%, #ff4d6d 100%);
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  border-radius: 16px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(255, 123, 46, 0.45);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
-.project-count-badge {
-  background: var(--surface);
-  color: var(--accent);
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
+.btn-generate-capsule:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(255, 123, 46, 0.6);
+  border-color: #ffe6db;
 }
 
-.product-tree-bar {
-  background: rgba(255, 123, 46, 0.08);
-  border: 1px dashed rgba(255, 123, 46, 0.28);
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  margin-top: 6px;
-  display: flex;
-  align-items: center;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.84rem;
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.tree-label {
-  letter-spacing: 0.02em;
-}
-
-/* Search input */
-.sidebar-search-box {
-  position: relative;
+.btn-generate-capsule:active {
+  transform: translateY(0);
 }
 
 .sidebar-search-box input {
@@ -717,15 +897,46 @@ body.projects-page {
   to { transform: rotate(360deg); }
 }
 
-/* Responsive */
-@media (max-width: 960px) {
+/* ── RESPONSIVE MEDIA QUERIES ── */
+@media (max-width: 1200px) {
+  .workspace-wrapper.three-column-layout {
+    grid-template-columns: 220px minmax(0, 1fr) 340px;
+    gap: 12px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .workspace-wrapper.three-column-layout {
+    grid-template-columns: 200px minmax(0, 1fr) 320px;
+    gap: 10px;
+    padding: 10px;
+  }
+  .capsule-inner-frame {
+    padding: 18px 14px 16px;
+  }
+}
+
+@media (max-width: 860px) {
+  .workspace-wrapper.three-column-layout {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    overflow-y: visible;
+    padding: 14px;
+    gap: 16px;
+  }
+
   .projects-sidebar {
     position: fixed;
     top: 64px;
     left: 0;
-    bottom: 0;
+    width: 280px;
+    height: calc(100vh - 64px);
     transform: translateX(-100%);
     box-shadow: 10px 0 30px rgba(0, 0, 0, 0.6);
+    border-radius: 0;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .projects-sidebar.open {
@@ -745,8 +956,15 @@ body.projects-page {
     display: block;
   }
 
-  .panes-viewport {
-    padding: 20px 16px 40px;
+  .story-middle-pane {
+    height: auto;
+    overflow-y: visible;
+  }
+
+  .generator-right-capsule {
+    height: auto;
+    min-height: 440px;
+    border-radius: 28px;
   }
 
   .comic-panels-grid {
