@@ -7,7 +7,7 @@ load_dotenv()
 # Prompt Engineering here
 root_agent = Agent(
     name="comic_story_generator",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="""
 You are a Comic Story Writer for school students .
 
