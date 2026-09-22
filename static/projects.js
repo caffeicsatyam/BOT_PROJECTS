@@ -34,51 +34,12 @@
         { label: "✨ Lost Constellation", prompt: "A student discovers an unregistered constellation that only glows when someone does a good deed" },
         { label: "🎈 Floating Library", prompt: "A whimsical traveling book balloon that delivers stories to mountain villages" }
       ],
-      title: "The Whispering Library Clock",
-      topic: "A magical grandfather clock in the library that whispers forgotten historical mysteries",
-      characters: [
-        { name: "Maya", trait: "an observant sixth-grader with a passion for ancient riddles" },
-        { name: "Oliver", trait: "her cautious best friend who carries a magnifying glass" },
-        { name: "Mr. Finch", trait: "the kindly elder librarian who knows all the secrets" }
-      ],
-      scenes: [
-        {
-          num: 1,
-          heading: "Chapter 1: The Curious Ticking",
-          content: "Deep in the quietest corner of Oakwood Elementary's library stood an ancient grandfather clock made of polished walnut. Maya ran her fingers over its carved brass pendulum. As the clock struck four, instead of a usual chime, a soft musical murmur echoed: *Seek the shelf where stars are bound.* Maya turned to Oliver with wide eyes."
-        },
-        {
-          num: 2,
-          heading: "Chapter 2: The Constellation Tome",
-          content: "Oliver climbed the wooden stool and pulled down a leather-bound astronomy encyclopedia. Inside lay a golden card with handwritten coordinates. Mr. Finch smiled warmly from his desk: 'I wondered how many years it would take for thoughtful eyes to hear the old clock's heartbeat.'"
-        },
-        {
-          num: 3,
-          heading: "Chapter 3: The Gift of History",
-          content: "Following the clue led them to a hidden glass case displaying the school's very first community charter from 1894. Maya and Oliver spent the afternoon reading about the founding students who planted the great oak outside. History was no longer just dates on a chalkboard—it was alive."
-        }
-      ],
-      moral: "Patience and attentive curiosity reveal the wonder hidden in ordinary places.",
-      rawText: `# Title
-The Whispering Library Clock
-
-# Characters
-- **Maya:** an observant sixth-grader with a passion for ancient riddles.
-- **Oliver:** her cautious best friend who carries a magnifying glass.
-- **Mr. Finch:** the kindly elder librarian who knows all the secrets.
-
-# Comic Scenes
-Scene 1: The Curious Ticking
-Deep in the quietest corner of Oakwood Elementary's library stood an ancient grandfather clock made of polished walnut. Maya ran her fingers over its carved brass pendulum. As the clock struck four, instead of a usual chime, a soft musical murmur echoed: "Seek the shelf where stars are bound." Maya turned to Oliver with wide eyes.
-
-Scene 2: The Constellation Tome
-Oliver climbed the wooden stool and pulled down a leather-bound astronomy encyclopedia. Inside lay a golden card with handwritten coordinates. Mr. Finch smiled warmly from his desk: "I wondered how many years it would take for thoughtful eyes to hear the old clock's heartbeat."
-
-Scene 3: The Gift of History
-Following the clue led them to a hidden glass case displaying the school's very first community charter from 1894. Maya and Oliver spent the afternoon reading about the founding students who planted the great oak outside. History was no longer just dates on a chalkboard—it was alive.
-
-# Moral
-Patience and attentive curiosity reveal the wonder hidden in ordinary places.`
+      title: "",
+      topic: "",
+      characters: [],
+      scenes: [],
+      moral: "",
+      rawText: ""
     },
     {
       id: "ai-comic-book-generator",
@@ -97,56 +58,17 @@ Patience and attentive curiosity reveal the wonder hidden in ordinary places.`
         { label: "🐉 Flying Dragon", prompt: "A timid baby dragon who is terrified of heights learns to glide with a hummingbird coach" },
         { label: "🎒 Time Backpack", prompt: "A magical backpack that pulls out harmless gadgets from the future" }
       ],
-      title: "The Robot's First Day",
-      topic: "A curious robot attends its first day at elementary school and helps in science class",
-      characters: [
-        { name: "Boltz", trait: "a friendly silver robot eager to learn math and make friends" },
-        { name: "Mia", trait: "a kind student who shares her colored pencils" },
-        { name: "Mr. Henderson", trait: "an encouraging science teacher who loves experiments" }
-      ],
-      scenes: [
-        {
-          num: 1,
-          heading: "Panel 1: Morning Homeroom",
-          content: "Boltz rolls into classroom 4B. *BEEP-BOOP!* His digital screen flashes a cheerful green smiley face. Mia waves warmly: 'Welcome Boltz! You can sit next to me!' Boltz beeps with delight: *WHIRR!* 'Thank you friend!'"
-        },
-        {
-          num: 2,
-          heading: "Panel 2: The Math Puzzle",
-          content: "Mr. Henderson writes a tricky equation on the board. *CLACK-CLACK!* Boltz's gears turn. Instead of blurting out the answer, he shows Mia the formula step-by-step with holographic sparkles. *BING!* Mia solves it with a beaming grin."
-        },
-        {
-          num: 3,
-          heading: "Panel 3: Recess Kickball",
-          content: "At recess, Boltz calculates the angle of the ball. *THUMP!* He kicks it straight to outfield! The playground erupts: *CHEER!* Boltz spins in a happy circle: *ZOOM!* 'School is fantastic!'"
-        }
-      ],
-      moral: "True friendship means sharing knowledge and lifting each other up.",
-      rawText: `# Title
-The Robot's First Day
-
-# Characters
-- **Boltz:** a friendly silver robot eager to learn math and make friends.
-- **Mia:** a kind student who shares her colored pencils.
-- **Mr. Henderson:** an encouraging science teacher who loves experiments.
-
-# Comic Scenes
-Scene 1: Morning Homeroom
-Boltz rolls into classroom 4B. BEEP-BOOP! His digital screen flashes a cheerful green smiley face. Mia waves warmly: "Welcome Boltz! You can sit next to me!" Boltz beeps with delight: WHIRR! "Thank you friend!"
-
-Scene 2: The Math Puzzle
-Mr. Henderson writes a tricky equation on the board. CLACK-CLACK! Boltz's gears turn. Instead of blurting out the answer, he shows Mia the formula step-by-step with holographic sparkles. BING! Mia solves it with a beaming grin.
-
-Scene 3: Recess Kickball
-At recess, Boltz calculates the angle of the ball. THUMP! He kicks it straight to outfield! The playground erupts: CHEER! Boltz spins in a happy circle: ZOOM! "School is fantastic!"
-
-# Moral
-True friendship means sharing knowledge and lifting each other up.`
+      title: "",
+      topic: "",
+      characters: [],
+      scenes: [],
+      moral: "",
+      rawText: ""
     }
   ];
 
   // ── LOCAL STORAGE KEY ──
-  const STORAGE_KEY = "bot_products_state_v2";
+  const STORAGE_KEY = "bot_products_state_v3";
 
   function loadSavedProducts() {
     try {
@@ -384,19 +306,48 @@ True friendship means sharing knowledge and lifting each other up.`
       `).join("") || `<span style="color:var(--text-dim);">No characters listed</span>`;
     }
 
+    // Comic Options in right capsule
+    const capsuleComicGroup = $("#capsuleComicOptionsGroup");
+    if (capsuleComicGroup) {
+      capsuleComicGroup.style.display = prod.productType === "comic" ? "block" : "none";
+    }
+
+    const hasContent = Boolean(prod.rawText || (prod.scenes && prod.scenes.length > 0));
+    const emptyBanner = $("#emptyStoryBanner");
+    const comicDisplayGrid = $("#comicDisplayGrid");
+    const moralBox = $("#moralBox");
+    const storyOutputWrapper = $(".story-output-wrapper");
+
+    if (emptyBanner) emptyBanner.style.display = hasContent ? "none" : "block";
+    if (comicDisplayGrid) comicDisplayGrid.style.display = hasContent ? "grid" : "none";
+    if (moralBox) moralBox.style.display = hasContent ? "flex" : "none";
+    if (storyOutputWrapper) storyOutputWrapper.style.display = hasContent ? "block" : "none";
+
     // Populate Panels / Chapters
     if (comicPanelsContainer) {
       const isComic = prod.productType === "comic";
-      comicPanelsContainer.innerHTML = (prod.scenes || []).map((sc) => {
+      comicPanelsContainer.innerHTML = (prod.scenes || []).map((sc, scIdx) => {
         let content = sc.content;
         if (isComic) {
           content = content.replace(/\b([A-Z]{3,8}!+)\b/g, '<span class="comic-sfx">$1</span>');
         }
+        const existingImg = window.__comic_panel_images && window.__comic_panel_images[scIdx];
+        const imgHtml = isComic ? `
+          <div class="comic-panel-illustration" style="margin-top:12px; border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.08); background:rgba(0,0,0,0.3); min-height:160px; display:flex; align-items:center; justify-content:center; position:relative;" id="panelImgWrap_${scIdx}">
+            ${existingImg ? `<img src="${existingImg}" style="width:100%; height:220px; object-fit:cover; display:block;" alt="Panel ${sc.num}">` : `
+              <button onclick="window.illustrateStaticPanel(${scIdx})" class="btn-illustrate-single" style="background:rgba(255,123,46,0.12); border:1px solid rgba(255,123,46,0.3); color:var(--accent); padding:8px 16px; border-radius:8px; font-weight:700; font-size:0.78rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                <span>✨</span> Illustrate Panel ${sc.num || scIdx + 1}
+              </button>
+            `}
+          </div>
+        ` : '';
+
         return `
           <div class="comic-panel-box">
-            <span class="panel-number-tag">${isComic ? "Panel " + sc.num : "Chapter " + sc.num}</span>
+            <span class="panel-number-tag">${isComic ? "Panel " + (sc.num || scIdx + 1) : "Chapter " + (sc.num || scIdx + 1)}</span>
             <div class="panel-header">${sc.heading}</div>
             <div class="panel-body">${content}</div>
+            ${imgHtml}
           </div>
         `;
       }).join("");
@@ -414,8 +365,8 @@ True friendship means sharing knowledge and lifting each other up.`
     if (storyScriptBox) storyScriptBox.value = prod.rawText || "";
 
     // Word count
-    if (wordCountBadge && prod.rawText) {
-      const words = prod.rawText.trim().split(/\s+/).length;
+    if (wordCountBadge) {
+      const words = prod.rawText ? prod.rawText.trim().split(/\s+/).length : 0;
       wordCountBadge.textContent = `${words} words`;
     }
 
@@ -425,7 +376,7 @@ True friendship means sharing knowledge and lifting each other up.`
     closeSidebar();
   }
 
-  // ── 4. MOBILE DRAWER ──
+  // ── 4. SIDEBAR TOGGLE & MOBILE DRAWER ──
   function openSidebar() {
     if (sidebar) sidebar.classList.add("open");
     if (sidebarBackdrop) sidebarBackdrop.classList.add("active");
@@ -436,10 +387,25 @@ True friendship means sharing knowledge and lifting each other up.`
     if (sidebarBackdrop) sidebarBackdrop.classList.remove("active");
   }
 
-  if (sidebarToggle) sidebarToggle.addEventListener("click", () => {
-    if (sidebar && sidebar.classList.contains("open")) closeSidebar();
-    else openSidebar();
-  });
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener("click", () => {
+      const wrapper = $(".workspace-wrapper");
+      if (window.innerWidth > 860) {
+        // Desktop Collapse / Disappear Toggle
+        if (wrapper) {
+          wrapper.classList.toggle("sidebar-collapsed");
+          const isCollapsed = wrapper.classList.contains("sidebar-collapsed");
+          sidebarToggle.innerHTML = isCollapsed 
+            ? `<span>☰</span> Show Sidebar` 
+            : `<span>☰</span> Hide Sidebar`;
+        }
+      } else {
+        // Mobile Drawer
+        if (sidebar && sidebar.classList.contains("open")) closeSidebar();
+        else openSidebar();
+      }
+    });
+  }
 
   if (sidebarBackdrop) sidebarBackdrop.addEventListener("click", closeSidebar);
 
@@ -599,10 +565,72 @@ True friendship means sharing knowledge and lifting each other up.`
       return hash;
     }
 
-    return products[0].id;
+  // ── 10. COMIC ILLUSTRATION HELPERS ──
+  window.__comic_panel_images = {};
+
+  window.illustrateStaticPanel = async function (idx) {
+    const currentProd = products.find((p) => p.id === activeProductId);
+    if (!currentProd || !currentProd.scenes || !currentProd.scenes[idx]) return;
+
+    const wrap = document.getElementById(`panelImgWrap_${idx}`);
+    if (wrap) {
+      wrap.innerHTML = `<span style="font-size:0.75rem; color:var(--text-dim); display:flex; align-items:center; gap:6px;"><span class="spinner"></span> Rendering Comic Illustration...</span>`;
+    }
+
+    const scene = currentProd.scenes[idx];
+    const styleSelect = document.getElementById("comicArtStyleSelect");
+    const style = styleSelect ? styleSelect.value : "comic-modern";
+    const prompt = scene.content || scene.heading || `Comic panel ${idx + 1} for ${currentProd.title}`;
+
+    try {
+      const res = await fetch("/api/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: prompt,
+          style: style,
+          model: "flux-schnell"
+        })
+      });
+      const data = await res.json();
+      if (data.image_url) {
+        window.__comic_panel_images[idx] = data.image_url;
+        if (wrap) {
+          wrap.innerHTML = `
+            <img src="${data.image_url}" style="width:100%; height:220px; object-fit:cover; display:block;" alt="Panel ${idx + 1}">
+            <button onclick="window.illustrateStaticPanel(${idx})" style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.75); border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:0.7rem; padding:4px 8px; border-radius:6px; cursor:pointer;">
+              🔄 Redo
+            </button>
+          `;
+        }
+      } else {
+        if (wrap) wrap.innerHTML = `<span style="color:#ef4444; font-size:0.75rem;">Failed to illustrate</span>`;
+      }
+    } catch (e) {
+      console.error(e);
+      if (wrap) wrap.innerHTML = `<span style="color:#ef4444; font-size:0.75rem;">Error generating image</span>`;
+    }
+  };
+
+  const illustrateAllBtn = document.getElementById("illustrateAllPanelsBtn");
+  if (illustrateAllBtn) {
+    illustrateAllBtn.addEventListener("click", async () => {
+      const currentProd = products.find((p) => p.id === activeProductId);
+      if (!currentProd || !currentProd.scenes) return;
+
+      illustrateAllBtn.disabled = true;
+      illustrateAllBtn.textContent = "⏳ Illustrating...";
+
+      for (let i = 0; i < currentProd.scenes.length; i++) {
+        await window.illustrateStaticPanel(i);
+      }
+
+      illustrateAllBtn.disabled = false;
+      illustrateAllBtn.textContent = "✨ Illustrate All Comic Panels";
+    });
   }
 
-  // ── 10. INITIALIZE ──
+  // ── 11. INITIALIZE ──
   renderSidebar();
   activeProductId = resolveInitialProduct();
   shiftToProduct(activeProductId);

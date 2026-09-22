@@ -1,0 +1,74 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --workspace-bg: #f8fafc;
+  --sidebar-bg: #ffffff;
+  --card-elevated: #ffffff;
+  --card-hover: #f1f5f9;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --accent: #ff7b2e;
+  --accent-hover: #ff8e47;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-active: rgba(255, 123, 46, 0.5);
+}
+
+html.dark {
+  --workspace-bg: #07070b;
+  --sidebar-bg: #0d0d14;
+  --card-elevated: #161622;
+  --card-hover: #1c1c2b;
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --accent: #ff7b2e;
+  --accent-hover: #ff8e47;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-active: rgba(255, 123, 46, 0.45);
+}
+
+body {
+  background-color: var(--workspace-bg);
+  color: var(--text-main);
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.font-comic {
+  font-family: 'Comic Neue', cursive, sans-serif;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Pulse animation for green online status */
+@keyframes pulseDot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.pulse-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #10b981;
+  border-radius: 50%;
+  animation: pulseDot 2s infinite;
+}

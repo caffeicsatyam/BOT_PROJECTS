@@ -1,201 +1,197 @@
-# AI Comic Story Generator
+# AI Comic & Story Studio | Black Orange Talent
 
-A Streamlit-based AI application that creates short, school-friendly comic stories from a topic and then lets a student refine the story by editing it or requesting specific changes.
+<p align="center">
+  <img src="static/logo.png" alt="Black Orange Talent Logo" width="120" />
+</p>
 
-The project uses Google ADK (Agent Development Kit) with a Gemini model to generate and revise story content while maintaining a lightweight memory of the current session.
+<p align="center">
+  <strong>Production-Ready AI Creative Studio with Multi-Modal Image Generation</strong><br>
+  Powered by <strong>Google Gemini</strong>, <strong>Google ADK</strong>, <strong>Cloudflare Workers AI (Free Tier)</strong>, <strong>FastAPI</strong>, and <strong>React + Tailwind CSS</strong>.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/FastAPI-0.110+-009688.svg?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/Google_Gemini-3.5_Flash-4285F4.svg?style=flat-square&logo=google&logoColor=white" alt="Google Gemini" />
+  <img src="https://img.shields.io/badge/Cloudflare-Workers_AI-F38020.svg?style=flat-square&logo=cloudflare&logoColor=white" alt="Cloudflare" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB.svg?style=flat-square&logo=react&logoColor=black" alt="React" />
+  <img src="https://img.shields.io/badge/TailwindCSS-v4-38B2AC.svg?style=flat-square&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+</p>
+
+---
 
 ## Overview
 
-This project is designed for classroom or learning scenarios where a student can:
+The **Black Orange Talent AI Creative Studio** is a dual-format creative suite designed for students and creators:
 
-- type a topic such as "A robot joins a school"
-- generate a complete comic story with characters, scenes, and a moral
-- edit the story manually inside the app
-- ask the AI to apply a new change while keeping the rest of the story intact
-- start a fresh story at any time
+1. **AI Comic Book Generator**:
+   - Generates action-packed comic scripts with visual camera setups, dialogue bubbles, and sound effect badges (**BAM!**, **WHOOSH!**, **ZAP!**, **POW!**).
+   - **Visual Comic Strip Reader**: Illustrates panels dynamically using **Cloudflare Workers AI Free Models** (FLUX.1 [schnell], SDXL Base 1.0, SDXL Lightning) and zero-config free fallbacks.
+   - **6 Curated Comic Art Styles**: Modern Comic (Marvel/DC), Manga / Shonen, Vintage Pop-Art (Roy Lichtenstein), 3D Animated (Pixar Style), Graphic Novel Noir, and Storybook Watercolor.
+   - **Character Cast Portraits**: One-click character avatar generation matching the chosen comic art style.
 
-The app is intentionally simple and interactive, making it a good starter project for AI-powered creative writing tools.
+2. **AI Story Generator**:
+   - Rich narrative chapter storytelling with thoughtful prose, character arcs, sensory details, and positive moral lessons.
 
-## Features
+---
 
-- Topic-based story generation
-- AI-assisted revision of the current story
-- Manual editing of the generated story in a text area
-- Session memory so the AI remembers the story while the browser session remains open
-- Short, positive, school-safe story content
-- Clean interface built with Streamlit
+## Architecture
 
-## Tech Stack
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                   React + Vite + Tailwind CSS SPA                      │
+│  - Multi-Product Switcher (Story vs. Comic Studio)                     │
+│  - Collapsible Sidebar with Full-Width Workspace Expansion             │
+│  - Consolidated Right-Side Generator Capsule (Styles, Models, Revise)  │
+│  - Visual Comic Strip Reader & Speech Bubble Dialogue Overlays         │
+│  - Real-Time Token Streaming (SSE) & Interactive Script Editor         │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ HTTP & SSE Streaming
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                         FastAPI Backend (8080)                         │
+│  - Multi-Tenant Session Isolation (UUID-keyed state store)             │
+│  - Real-Time SSE Endpoints (/api/generate-stream, /api/revise-stream)  │
+│  - Google ADK InMemoryRunner with Gemini Flash Agents                  │
+│  - Image Generation Router (/api/generate-image)                       │
+└───────────────────┬────────────────────────────────┬───────────────────┘
+                    │                                │
+                    ▼                                ▼
+┌──────────────────────────────────────┐ ┌───────────────────────────────┐
+│ Cloudflare Workers AI (Free Tier)    │ │ Zero-Config Free Flux Engine  │
+│ • @cf/black-forest-labs/flux-schnell │ │ • Instant serverless pipeline │
+│ • @cf/stabilityai/sdxl-base-1.0      │ │ • Zero API key needed backup  │
+│ • 10,000 Neurons/Day allocation      │ │ • 100% reliable fallback      │
+└──────────────────────────────────────┘ └───────────────────────────────┘
+```
 
-- Python
-- Streamlit
-- Google Agent Development Kit (ADK)
-- Google GenAI / Gemini model
-- dotenv for environment variable loading
+---
 
 ## Project Structure
 
-```text
+```
 BOT_RAG/
-├── README.md
-├── requirements.txt
-├── ai_story_generator/
-│   ├── agent.py
-│   └── app.py
-└── .env
+├── agent.py                 # Google ADK agent prompts (comic_agent & story_agent)
+├── image_generator.py       # Cloudflare Workers AI & Free Flux image pipeline
+├── server.py                # FastAPI backend (SSE streaming, state, image API)
+├── run_web.py               # Backend entry launcher script with auto-reload
+├── requirements.txt         # Production Python dependencies
+├── .env.example             # Template for API keys and Cloudflare settings
+├── .gitignore               # Clean git ignore patterns
+│
+├── frontend/                # React + Tailwind CSS SPA
+│   ├── src/
+│   │   ├── components/      # VisualComicStrip, GeneratorCapsule, StoryMiddlePane, etc.
+│   │   ├── context/         # ThemeContext (Dark / Light mode)
+│   │   ├── services/        # API service and SSE streaming consumer
+│   │   └── utils/           # Markdown & scene parsers
+│   ├── public/              # Static assets (logo.png, robot_hero.jpg, favicon)
+│   └── package.json         # Vite + React dependencies & scripts
+│
+└── static/                  # Vanilla HTML/CSS/JS Studio & Landing Page
+    ├── index.html           # Brand Landing Page
+    ├── products.html        # Unified Creative Studio
+    ├── projects.js          # Client-side state, streaming & illustration logic
+    └── projects.css         # Modern 3-column responsive layout
 ```
 
-### Files
+---
 
-- `README.md`: project documentation
-- `requirements.txt`: Python dependencies
-- `ai_story_generator/agent.py`: defines the root AI agent and the story-writing prompt
-- `ai_story_generator/app.py`: Streamlit UI and session logic
-- `.env`: local environment variables such as API keys (not committed to version control)
+## Quick Start
 
-## Prerequisites
+### Prerequisites
+- **Python 3.10+**
+- **Node.js 18+** & `npm`
+- **Google Gemini API Key** (Free tier from [Google AI Studio](https://aistudio.google.com/))
+- *(Optional)* **Cloudflare Account ID & Workers AI Token** (10,000 Neurons/Day free tier)
 
-Before running the app, make sure you have:
+---
 
-- Python 3.10 or newer
-- A Google API key or valid Gemini access configured in your environment
-- A local terminal with access to the project folder
+### 1. Environment Setup
 
-## Installation
-
-1. Open a terminal in the project root.
-2. Create and activate a virtual environment:
+Create a `.env` file in the project root (or copy from `.env.example`):
 
 ```bash
-python -m venv .venv
+cp .env.example .env
 ```
 
-On Windows PowerShell:
-
-```powershell
-.venv\Scripts\Activate.ps1
-```
-
-On macOS/Linux:
-
-```bash
-source .venv/bin/activate
-```
-
-3. Install the dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-## Environment Setup
-
-Create a `.env` file in the project root with your Google API configuration, for example:
+Fill in your credentials:
 
 ```env
-GOOGLE_API_KEY=your_api_key_here
+# Required for Story and Comic Generation
+GOOGLE_API_KEY=your_google_gemini_api_key_here
+
+# Optional: Cloudflare Workers AI (10,000 Neurons/Day Free Tier)
+CLOUDFLARE_API_KEY=your_cloudflare_workers_ai_token_here
+CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id_here
 ```
 
-If your environment uses a different variable name for the Google API client, adjust the file accordingly. The app loads environment variables using Python-dotenv in the agent configuration.
+> [!NOTE]
+> If Cloudflare credentials are not provided, the studio automatically runs on the **Zero-Config Free Flux Engine**, meaning image generation works out-of-the-box with **zero setup**.
 
-## Running the App
+---
 
-From the project root, switch into the app folder and start Streamlit:
+### 2. Backend Setup (FastAPI)
 
 ```bash
-cd ai_story_generator
-streamlit run app.py
-```
+# Create and activate virtual environment
+python -m venv venv
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
 
-Then open the local URL shown in the terminal, typically:
-
-```text
-http://localhost:8501
-```
-
-## How It Works
-
-### 1. Story generation
-
-The user enters a topic in the Streamlit interface. The app sends the request to the configured Gemini agent.
-
-### 2. Agent behavior
-
-The agent in `ai_story_generator/agent.py` is instructed to:
-
-- write a complete comic story from a topic
-- return the story in exactly four sections: Title, Characters, Comic Scenes, and Moral
-- keep the tone positive, school-appropriate, and easy for students to understand
-- limit the story to a clear, readable comic format
-
-### 3. Revision flow
-
-When the student saves edits or asks for a change, the app sends the current story plus the requested modification to the model. The prompt tells the model to treat the current story as the latest valid version and make only the requested changes while preserving everything else.
-
-### 4. Session memory
-
-The app keeps a runner and session in `st.session_state`, allowing the AI to remember the current story while the user stays on the page. This gives a natural editing and revision experience.
-
-## Usage Guide
-
-### Generate a new story
-
-1. Enter a comic topic.
-2. Click "✨ Generate Comic".
-3. Review the generated story.
-
-### Edit the story manually
-
-1. Update the text in the story editor box.
-2. Click "💾 Save my edits".
-3. The app keeps your updated version for the next AI revision.
-
-### Ask for a story change
-
-1. Type a change request such as "make the ending funnier" or "add a new character".
-2. Click "🪄 Apply change".
-3. The model rewrites the full story with the requested update applied.
-
-### Start over
-
-- Click "🆕 Start a new story" to reset the session and create a brand-new comic.
-
-## Example Prompt
-
-```text
-A robot joins a school
-```
-
-Example revision request:
-
-```text
-make the ending more exciting and add a friendly helper character
-```
-
-## Troubleshooting
-
-### Streamlit does not start
-
-Make sure dependencies are installed:
-
-```bash
+# Install dependencies
 pip install -r requirements.txt
+
+# Start backend server
+python run_web.py
 ```
 
-Also confirm that you are in the correct folder and that your virtual environment is activated.
+The server starts at `http://127.0.0.1:8080`.
 
-### AI requests fail
+---
 
-Check that your Google API key is set correctly in `.env` and that the environment is loaded before launching the app.
+### 3. Frontend Setup (React + Tailwind)
 
-### Import errors
+In a separate terminal:
 
-If Python cannot find modules, verify that the package installation succeeded and that you are running the app from the correct directory.
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-## Notes
+Open `http://localhost:5173` to explore the React studio with hot-reloading. API requests are automatically proxied to the FastAPI backend on port 8080.
 
-This project is intentionally lightweight and educational. It works well as a starter app for AI-assisted writing, classroom demos, or experimentation with agent-driven storytelling.
+#### Production Build (Served directly by FastAPI)
+
+```bash
+cd frontend
+npm run build
+```
+
+Once built, visit `http://127.0.0.1:8080/` or `http://127.0.0.1:8080/app` to experience the production build served directly from FastAPI.
+
+---
+
+## API Reference
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/generate-stream` | Server-Sent Events (SSE) real-time streaming story/comic generation |
+| `POST` | `/api/generate` | Standard JSON story/comic script generation |
+| `POST` | `/api/revise-stream` | Real-time SSE streaming story revision |
+| `POST` | `/api/revise` | Standard JSON story revision |
+| `POST` | `/api/generate-image` | Generates comic panel illustrations via Cloudflare Workers AI or fallback engine |
+| `GET` | `/api/image-styles` | Lists available comic art styles and AI models |
+| `GET` | `/api/cloudflare/status`| Checks Cloudflare credentials and free tier status |
+| `POST` | `/api/cloudflare/config`| Updates Cloudflare Account ID & API Token dynamically |
+| `POST` | `/api/save-edits` | Persists user manual edits to the active session |
+| `POST` | `/api/reset` | Resets a specific session state |
+| `GET` | `/api/state` | Retrieves the active session state |
+
+---
 
 ## License
 
-No explicit license file is included in the repository. If you plan to share or publish this project, add an appropriate license before distribution.
+MIT © Black Orange Talent Pvt. Ltd.

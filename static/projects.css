@@ -92,6 +92,17 @@ body.projects-page {
   padding: 16px 20px;
   background: var(--workspace-bg);
   box-sizing: border-box;
+  transition: grid-template-columns 0.25s ease;
+}
+
+/* ── SIDEBAR COLLAPSED (DISAPPEAR BUTTON) ── */
+.workspace-wrapper.sidebar-collapsed {
+  grid-template-columns: minmax(0, 1fr) 380px !important;
+  grid-template-areas: "middle right" !important;
+}
+
+.workspace-wrapper.sidebar-collapsed .projects-sidebar {
+  display: none !important;
 }
 
 /* ── COLUMN 1 (LEFT): PRODUCT SIDEBAR ── */
