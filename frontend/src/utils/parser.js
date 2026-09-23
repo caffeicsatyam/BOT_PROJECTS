@@ -55,7 +55,7 @@ export function parseStoryMarkdown(markdownText) {
     const h = part.header;
     if (h.includes('title')) {
       // Clean quotes or formatting from title
-      sections.title = part.content.replace(/^["'\s]+|["'\s]+$/g, '');
+      sections.title = part.content.replace(/^["'\s*#]+|["'\s*#]+$/g, '');
     } else if (h.includes('character')) {
       // Parse character bullet points
       const lines = part.content.split('\n');
@@ -78,32 +78,46 @@ export function parseStoryMarkdown(markdownText) {
         }
       }
     } else if (h.includes('scene') || h.includes('comic') || h.includes('chapter')) {
-      // Parse individual scenes (Scene 1:, Chapter 1:, etc.)
-      const sceneBlocks = part.content.split(/(?=Scene\s+\d+:|Chapter\s+\d+:|Panel\s+\d+:)/i);
+      // Robust split matching any inline or newline Scene/Chapter/Panel markers (with or without bold asterisks/hashes)
+      const sceneRegex = /(?:^|\s+)(?=(?:\*{1,2}|#{1,4}\s*)?(?:Scene|Chapter|Panel)\s*\d+[:.\s*-])/gi;
+      const blocks = part.content.split(sceneRegex).map(b => b.trim()).filter(Boolean);
       let sceneIndex = 1;
 
-      for (const block of sceneBlocks) {
-        const trimmedBlock = block.trim();
-        if (!trimmedBlock) continue;
-
-        const headingMatch = trimmedBlock.match(/^(Scene\s+\d+|Chapter\s+\d+|Panel\s+\d+)(?::\s*(.*))?/i);
+      for (const block of blocks) {
+        const headingMatch = block.match(/^(?:\*{1,2}|#{1,4}\s*)?(Scene\s*\d+|Chapter\s*\d+|Panel\s*\d+)(?:\*{1,2})?[:.\s*-]*(.*)$/is);
         if (headingMatch) {
-          const headingLabel = headingMatch[1].trim();
-          const subtitle = headingMatch[2] ? headingMatch[2].split('\n')[0].trim() : '';
-          const bodyLines = trimmedBlock.split('\n');
-          bodyLines.shift(); // Remove heading line
-          const content = bodyLines.join('\n').trim();
+          const label = headingMatch[1].replace(/\*/g, '').trim();
+          let rest = headingMatch[2] ? headingMatch[2].trim() : '';
+
+          const lines = rest.split('\n');
+          let firstLine = lines[0].trim();
+          let subtitle = '';
+          let body = '';
+
+          // If first line is a concise subtitle (not a camera direction or full sentence)
+          if (firstLine.length <= 45 && !/[.?!]/.test(firstLine) && !/^(?:Camera|\*Camera|\[Visual|Visual)/i.test(firstLine)) {
+            subtitle = firstLine.replace(/\*/g, '').trim();
+            body = lines.slice(1).join('\n').trim();
+          } else {
+            body = rest;
+          }
+
+          // Clean empty sound effect tags like "- **Sound Effect:**"
+          body = body
+            .replace(/[-*•]?\s*\*\*Sound\s*Effects?:?\*\*\s*:?/gi, '')
+            .replace(/[-*•]?\s*Sound\s*Effects?:?\s*:?/gi, '')
+            .trim();
 
           sections.scenes.push({
             num: sceneIndex++,
-            heading: subtitle ? `${headingLabel}: ${subtitle}` : headingLabel,
-            content: content || trimmedBlock
+            heading: subtitle ? `${label}: ${subtitle}` : label,
+            content: body || block
           });
         } else {
           sections.scenes.push({
             num: sceneIndex++,
             heading: `Scene ${sceneIndex}`,
-            content: trimmedBlock
+            content: block
           });
         }
       }
@@ -116,7 +130,7 @@ export function parseStoryMarkdown(markdownText) {
         });
       }
     } else if (h.includes('moral')) {
-      sections.moral = part.content.replace(/^["'\s]+|["'\s]+$/g, '');
+      sections.moral = part.content.replace(/^["'\s*]+|["'\s*]+$/g, '');
     }
   }
 

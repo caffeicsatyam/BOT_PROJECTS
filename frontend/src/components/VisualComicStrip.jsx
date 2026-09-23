@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, 
   Image as ImageIcon, 
@@ -7,8 +7,11 @@ import {
   Maximize2, 
   Users, 
   Award,
-  BookOpen
+  BookOpen,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
+import { comicSound } from '../utils/soundEffects';
 
 export default function VisualComicStrip({
   product,
@@ -21,34 +24,104 @@ export default function VisualComicStrip({
   const [activeModalImage, setActiveModalImage] = useState(null);
   const [characterAvatars, setCharacterAvatars] = useState({});
   const [generatingAvatar, setGeneratingAvatar] = useState({});
+  const [soundEnabled, setSoundEnabled] = useState(comicSound.enabled);
+  const [recentlyPlayedSfx, setRecentlyPlayedSfx] = useState(null);
 
-  // Helper to extract dialogues and sound effects from scene text
+  useEffect(() => {
+    const unsub = comicSound.onToggle(setSoundEnabled);
+    return unsub;
+  }, []);
+
+  const handleToggleSound = () => {
+    const newState = comicSound.toggleSound();
+    setSoundEnabled(newState);
+  };
+
+  const handlePlaySfx = (sfxText, e) => {
+    if (e) e.stopPropagation();
+    comicSound.play(sfxText);
+    setRecentlyPlayedSfx(sfxText);
+    setTimeout(() => {
+      setRecentlyPlayedSfx(prev => (prev === sfxText ? null : prev));
+    }, 450);
+  };
+
+  // Helper to extract dialogues, clean captions, visual directions, and sound effects
   const parsePanelDetails = (content) => {
-    if (!content) return { dialogues: [], soundEffects: [], description: '' };
-    const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
+    if (!content) return { dialogues: [], soundEffects: [], description: '', visualDirection: '' };
+    
+    // Normalize content
+    const cleanContent = content
+      .replace(/[-*•]?\s*\*\*Sound\s*Effects?:?\*\*\s*:?/gi, '')
+      .replace(/[-*•]?\s*Sound\s*Effects?:?\s*:?/gi, '');
+
+    const lines = cleanContent.split('\n').map(l => l.trim()).filter(Boolean);
     const dialogues = [];
     const soundEffects = [];
-    const descriptions = [];
+    let captionText = '';
+    let visualText = '';
+    const otherDescriptions = [];
 
+    // 1. Extract sound effects across the content (e.g. **BAM!**, **ZZZT! CRUNCH!**)
+    const rawSfxMatches = content.match(/\*\*([A-Z0-9!?\s-]+)\*\*/gi) || [];
+    rawSfxMatches.forEach(raw => {
+      const inner = raw.replace(/\*/g, '').trim();
+      // Exclude labels like "Sound Effect:", "Camera:", "Scene 1:"
+      if (/^(?:Sound\s+Effects?|Scene|Panel|Chapter|Camera)/i.test(inner)) return;
+      
+      // Tokenize if multiple sound effects are inside one bold tag (e.g. "ZZZT! CRUNCH!")
+      const tokens = inner.split(/\s+/).filter(Boolean);
+      tokens.forEach(token => {
+        const clean = token.replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9!?-]+$/g, '').trim();
+        if (clean && clean.length >= 2 && !soundEffects.includes(clean)) {
+          soundEffects.push(clean);
+        }
+      });
+    });
+
+    // 2. Parse lines for Dialogues, Captions, and Visual Directions
     lines.forEach(line => {
-      // Sound effects like **BAM!**, **WHOOSH!**
-      const sfxMatches = line.match(/\*\*([A-Z0-9!]+)\*\*/g);
-      if (sfxMatches) {
-        sfxMatches.forEach(s => soundEffects.push(s.replace(/\*/g, '')));
+      // Ignore stripped empty labels
+      if (/^[-*•]?\s*(?:Sound\s*Effects?:?|\*\*Sound\s*Effects?:?\*\*)\s*$/i.test(line)) return;
+
+      // Extract explicit Captions (e.g. Caption: "...", Narrator: "...")
+      const capMatch = line.match(/^(?:Caption|Narrator):\s*["“]?(.*?)["”]?$/i);
+      if (capMatch) {
+        captionText = capMatch[1].trim();
+        return;
       }
 
-      // Dialogues: lines with quotation marks
+      // Extract visual / camera angles (e.g. [Camera: ...], *Camera angle: ...*)
+      if (/^(?:\[Camera|Camera\s*angle|\*Camera|\[Visual|Visual:)/i.test(line)) {
+        const cleanVis = line.replace(/^\[|\]$/g, '').replace(/^\*|\*$/g, '').trim();
+        if (!visualText) visualText = cleanVis;
+        return;
+      }
+
+      // Dialogues: character speech with quotation marks
       if (line.includes('"') || line.includes('“')) {
-        dialogues.push(line.replace(/\*\*([A-Z0-9!]+)\*\*/g, '').trim());
+        const strippedDlg = line.replace(/\*\*([A-Z0-9!?\s-]+)\*\*/gi, '').trim();
+        if (strippedDlg) dialogues.push(strippedDlg);
       } else {
-        descriptions.push(line.replace(/\*\*([A-Z0-9!]+)\*\*/g, '').trim());
+        // Descriptive narrative line
+        const strippedDesc = line
+          .replace(/\*\*([A-Z0-9!?\s-]+)\*\*/gi, '')
+          .replace(/^\*|\*$/g, '')
+          .trim();
+        if (strippedDesc && strippedDesc.length > 3) {
+          otherDescriptions.push(strippedDesc);
+        }
       }
     });
+
+    // Determine clean caption: prefer explicit caption, otherwise narrative description (not camera note)
+    const finalCaption = captionText || (otherDescriptions.length > 0 ? otherDescriptions[0] : '');
 
     return {
       dialogues,
       soundEffects,
-      description: descriptions.join(' ')
+      description: finalCaption,
+      visualDirection: visualText
     };
   };
 
@@ -98,6 +171,32 @@ export default function VisualComicStrip({
   return (
     <div className="space-y-6">
       
+      {/* ── AUDIO CONTROL & SFX STATUS BAR ── */}
+      <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-transparent border border-orange-500/20">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-black uppercase tracking-wider text-orange-600 dark:text-orange-400 flex items-center gap-1.5">
+            <span>💥</span>
+            <span>Interactive Comic Sound Engine</span>
+          </span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:inline">
+            (Click any sound effect badge to play its cartoon audio)
+          </span>
+        </div>
+
+        <button
+          onClick={handleToggleSound}
+          className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer border ${
+            soundEnabled
+              ? 'bg-orange-500 text-white border-orange-600 shadow-sm'
+              : 'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-300 border-black/10 dark:border-white/10'
+          }`}
+          title={soundEnabled ? 'Click to mute comic SFX' : 'Click to enable comic SFX'}
+        >
+          {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+          <span>{soundEnabled ? 'SFX Audio: ON' : 'SFX Audio: OFF'}</span>
+        </button>
+      </div>
+
       {/* ── CHARACTER AVATARS BAR ── */}
       {product.characters && product.characters.length > 0 && (
         <div className="p-4 rounded-2xl bg-white dark:bg-white/[0.02] border border-black/10 dark:border-white/10 shadow-sm space-y-3">
@@ -249,24 +348,36 @@ export default function VisualComicStrip({
                   </div>
                 )}
 
-                {/* Sound Effect Floating Badges (BAM!, WHOOSH!, etc.) */}
+                {/* Sound Effect Floating Badges (Interactive Starburst) */}
                 {soundEffects.length > 0 && (
-                  <div className="absolute top-3 right-3 flex flex-col gap-1.5 pointer-events-none z-10">
-                    {soundEffects.map((sfx, sfxIdx) => (
-                      <span
-                        key={sfxIdx}
-                        className="px-2.5 py-1 text-xs sm:text-sm font-black uppercase tracking-wider rounded-lg bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 text-white shadow-xl transform rotate-3 border-2 border-white scale-105 filter drop-shadow"
-                      >
-                        {sfx}
-                      </span>
-                    ))}
+                  <div className="absolute top-3 right-3 flex flex-col gap-2 z-20">
+                    {soundEffects.map((sfx, sfxIdx) => {
+                      const theme = comicSound.getVisualTheme(sfx);
+                      const isRecentlyTriggered = recentlyPlayedSfx === sfx;
+
+                      return (
+                        <button
+                          key={sfxIdx}
+                          onClick={(e) => handlePlaySfx(sfx, e)}
+                          title="Click to play comic sound effect! 🔊"
+                          className={`group/sfx relative px-3 py-1.5 text-xs sm:text-sm font-black uppercase tracking-wider rounded-xl bg-gradient-to-r ${theme.gradient} ${theme.textColor} border-2 ${theme.border} shadow-lg ${theme.shadow} transform transition-all duration-150 cursor-pointer select-none active:scale-90 hover:scale-110 ${
+                            sfxIdx % 2 === 0 ? '-rotate-3 hover:rotate-0' : 'rotate-3 hover:rotate-0'
+                          } ${isRecentlyTriggered ? 'scale-125 ring-4 ring-yellow-400 animate-pulse' : ''}`}
+                        >
+                          <span className="flex items-center gap-1 filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                            <span className="text-xs">{theme.emoji}</span>
+                            <span>{sfx}</span>
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
 
                 {/* Subtitle / Caption Narration at bottom of image if description exists */}
                 {description && (
-                  <div className="absolute bottom-2 left-2 right-2 px-2.5 py-1.5 rounded-lg bg-black/75 backdrop-blur-sm text-[11px] text-slate-200 border border-white/10 line-clamp-2">
-                    <span className="font-bold text-amber-300 mr-1">CAPTION:</span>
+                  <div className="absolute bottom-2 left-2 right-2 px-3 py-2 rounded-xl bg-black/85 backdrop-blur-md text-[11px] text-slate-200 border border-white/15 line-clamp-2 shadow-md">
+                    <span className="font-black text-amber-300 mr-1 tracking-wide">CAPTION:</span>
                     {description}
                   </div>
                 )}
@@ -279,9 +390,9 @@ export default function VisualComicStrip({
                   dialogues.map((dlg, dIdx) => (
                     <div
                       key={dIdx}
-                      className="relative p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/25 border-2 border-amber-400/40 text-xs font-medium text-amber-950 dark:text-amber-100 shadow-sm leading-relaxed"
+                      className="relative p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/25 border-2 border-amber-400/40 text-xs font-medium text-amber-950 dark:text-amber-100 shadow-sm leading-relaxed"
                     >
-                      <span className="text-amber-600 dark:text-amber-400 font-bold mr-1">💬</span>
+                      <span className="text-amber-600 dark:text-amber-400 font-bold mr-1.5">💬</span>
                       {dlg}
                     </div>
                   ))

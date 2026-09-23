@@ -13,6 +13,7 @@ import {
   FileText
 } from 'lucide-react';
 import VisualComicStrip from './VisualComicStrip';
+import { comicSound } from '../utils/soundEffects';
 
 export default function StoryMiddlePane({
   product,
@@ -41,7 +42,7 @@ export default function StoryMiddlePane({
   const ProductIcon = isComic ? Film : BookOpen;
   const hasContent = Boolean(product.rawText || (product.scenes && product.scenes.length > 0));
 
-  // Format sound effects and dialogue in script view
+  // Format sound effects and dialogue in script view with interactive audio playback
   const renderPanelText = (content) => {
     if (!content) return null;
     const lines = content.split('\n');
@@ -51,26 +52,32 @@ export default function StoryMiddlePane({
       if (!trimmed) return <div key={idx} className="h-2" />;
 
       const isDialogue = trimmed.includes('"') || trimmed.includes('“');
-      const parts = trimmed.split(/(\*\*[A-Z0-9!]+\*\*)/g);
+      const parts = trimmed.split(/(\*\*[A-Z0-9!?-]+\*\*)/gi);
 
       return (
         <div
           key={idx}
           className={`text-xs sm:text-[13px] leading-relaxed ${
             isDialogue
-              ? 'text-amber-900 dark:text-amber-100 font-medium pl-3 border-l-2 border-[#ff7b2e]/60 my-1 bg-[#ff7b2e]/10 dark:bg-[#ff7b2e]/5 py-1 rounded-r'
-              : 'text-slate-700 dark:text-slate-300'
+              ? 'text-amber-900 dark:text-amber-100 font-medium pl-3 border-l-2 border-[#ff7b2e]/60 my-1.5 bg-[#ff7b2e]/10 dark:bg-[#ff7b2e]/5 py-1.5 rounded-r-lg'
+              : 'text-slate-700 dark:text-slate-300 my-0.5'
           }`}
         >
           {parts.map((p, pIdx) => {
-            if (/^\*\*[A-Z0-9!]+\*\*$/.test(p)) {
+            if (/^\*\*[A-Z0-9!?-]+\*\*$/i.test(p)) {
+              const cleanSfx = p.replace(/\*/g, '');
+              const theme = comicSound.getVisualTheme(cleanSfx);
               return (
-                <span
+                <button
+                  type="button"
                   key={pIdx}
-                  className="inline-block px-1.5 py-0.5 mx-1 font-extrabold text-[11px] uppercase tracking-wider rounded bg-gradient-to-r from-[#ff7b2e] to-rose-500 text-white shadow-sm transform -rotate-1"
+                  onClick={() => comicSound.play(cleanSfx)}
+                  title="Click to play comic sound effect! 🔊"
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 mx-1 font-black text-[11px] uppercase tracking-wider rounded-md bg-gradient-to-r ${theme.gradient} ${theme.textColor} border ${theme.border} shadow-sm transform -rotate-1 hover:rotate-0 hover:scale-110 active:scale-95 transition cursor-pointer select-none`}
                 >
-                  {p.replace(/\*/g, '')}
-                </span>
+                  <span>{theme.emoji}</span>
+                  <span>{cleanSfx}</span>
+                </button>
               );
             }
             return p;
