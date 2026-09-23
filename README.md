@@ -66,108 +66,41 @@ The **Black Orange Talent AI Creative Studio** is a dual-format creative suite d
 
 ---
 
-## Data Flow Diagrams (DFD)
+## Product Workflows & Flowcharts
 
-The system isolates state and manages real-time streaming and multi-modal generation for each creative product. For detailed level-0 context models and data flow dictionaries, see [DFD_DIAGRAMS.md](DFD_DIAGRAMS.md).
+Simple, step-by-step visual workflows showing how each creative product operates:
 
-### 1. AI Story Generator (Data Flow Diagram)
+### 1. AI Story Generator Flow
 
 ```mermaid
 flowchart TD
-    classDef entity fill:#1e293b,stroke:#64748b,stroke-width:2px,color:#f8fafc;
-    classDef process fill:#2563eb,stroke:#1d4ed8,stroke-width:2px,color:#ffffff;
-    classDef store fill:#7c3aed,stroke:#6d28d9,stroke-width:2px,color:#ffffff;
-    classDef external fill:#0f766e,stroke:#14b8a6,stroke-width:2px,color:#ffffff;
-
-    Student["👤 Student / Author"]:::entity
-    GeminiAPI["🧠 Google Gemini API (gemini-3.5-flash)"]:::external
-
-    P1("1.0 Topic & Prompt Ingestion"):::process
-    P2("2.0 Session & Agent Orchestration"):::process
-    P3("3.0 Story Inference & Token Streaming"):::process
-    P4("4.0 Markdown Parsing & Decomposition"):::process
-    P5("5.0 Story Studio Workspace & Editor"):::process
-    P6("6.0 Revision & Continuity Pipeline"):::process
-
-    D1[("D1: Client LocalStorage (bot_products_state_v3)")]:::store
-    D2[("D2: Server SessionStore (InMemoryRunner & Context Events)")]:::store
-
-    Student -->|Story Topic or Preset Chip| P1
-    P1 -->|Validated Story Request| P2
-    P2 <-->|Retrieve or Initialize Session State| D2
-    P2 -->|Formatted Agent Prompt & Recent Events| P3
-    P3 <-->|HTTP REST Content Stream| GeminiAPI
-    P3 -->|SSE Token Stream| P4
-
-    P4 -->|Parsed Story Structure| P5
-    P5 -->|Rendered Chapters, Character Cards & Moral Badge| Student
-    P5 <-->|Auto-Save & Hydrate State| D1
-
-    Student -->|Direct Chapter Edits| P5
-    P5 -->|Updated Story Text| P2
-    Student -->|Revision Instruction Change Request| P6
-    P5 -->|Current Story Context| P6
-    P6 -->|Revision Message Prompt Template| P2
+    A["👤 1. User Enters Topic or Picks Suggestion"] --> B["⚡ 2. FastAPI Backend Routes Request"]
+    B --> C["🧠 3. Google Gemini Flash Generates Story"]
+    C --> D["📡 4. Real-Time Token Streaming (SSE) to Studio"]
+    D --> E["📖 5. Formats Title, Characters, Chapters & Moral"]
+    E --> F["✏️ 6. Read, Edit Directly or Request Revisions"]
+    F -.->|New Change Request| B
 ```
 
 ---
 
-### 2. AI Comic Book Generator (Data Flow Diagram)
+### 2. AI Comic Book Generator Flow
 
 ```mermaid
 flowchart TD
-    classDef entity fill:#1e293b,stroke:#64748b,stroke-width:2px,color:#f8fafc;
-    classDef process fill:#ea580c,stroke:#c2410c,stroke-width:2px,color:#ffffff;
-    classDef store fill:#7c3aed,stroke:#6d28d9,stroke-width:2px,color:#ffffff;
-    classDef external fill:#0f766e,stroke:#14b8a6,stroke-width:2px,color:#ffffff;
-    classDef audio fill:#db2777,stroke:#be185d,stroke-width:2px,color:#ffffff;
+    A["👤 1. User Enters Prompt, Selects Art Style & Model"] --> B["🧠 2. Gemini AI Writes 5-6 Panel Comic Script"]
+    B --> C["✂️ 3. Script Parser Extracts Camera Angles, Dialogues & SFX"]
 
-    Creator["👤 Student / Comic Creator"]:::entity
-    GeminiAPI["🧠 Google Gemini API (comic_agent)"]:::external
-    CloudflareAPI["⚡ Cloudflare Workers AI (Flux-1-Schnell)"]:::external
-    FallbackFlux["🌐 Free Zero-Config Flux Engine"]:::external
-    AudioCtx["🔊 Browser AudioContext (Web Audio API)"]:::audio
+    C --> D["🔊 4. Web Audio Synthesizer Plays Sound Effects (BAM! ZAP!)"]
+    C --> E["🎨 5. Illustrate Panels & Character Avatars"]
 
-    P1("1.0 Scenario & Style Configuration"):::process
-    P2("2.0 Script Session & Agent Orchestration"):::process
-    P3("3.0 Script Generation & SSE Streaming"):::process
-    P4("4.0 Script & Panel Parser Engine"):::process
-    P5("5.0 Visual Comic Strip Reader & Dialogue Overlay"):::process
-    P6("6.0 Multi-Modal Prompt Engineering & Visual Router"):::process
-    P7("7.0 Web Audio SFX Synthesizer"):::process
-    P8("8.0 Script Revision & State Persistence"):::process
+    E --> F["⚡ Cloudflare Workers AI (Flux / SDXL)"]
+    E --> G["🌐 Free Zero-Config Flux Engine (Auto-Fallback)"]
 
-    D1[("D1: Client LocalStorage (State, Style, CF Keys, Image Cache)")]:::store
-    D2[("D2: Server SessionStore (UUID Session State, InMemoryRunner)")]:::store
-
-    Creator -->|Topic, Art Style & Model Choice| P1
-    P1 -->|Validated Comic Request| P2
-    P2 <-->|Fetch or Update Session Runner| D2
-    P2 -->|Script Prompt & Direction Rules| P3
-    P3 <-->|Inference Stream| GeminiAPI
-    P3 -->|Raw Script Stream via SSE| P4
-
-    P4 -->|Structured Comic Panels & Dialogue| P5
-    P4 -->|Extracted Sound Effect Strings| P7
-    P7 -->|Oscillator Frequencies & Noise Buffers| AudioCtx
-    AudioCtx -->|Synthesized Acoustic Sound Effect| Creator
-
-    Creator -->|Trigger Panel or Avatar Illustration| P6
-    P5 -->|Raw Panel Visual & Camera Description| P6
-    P6 <-->|Read Active Art Style & User CF Credentials| D1
-    P6 -->|Sanitized Prompt & Style Suffix| CloudflareAPI
-    P6 -.->|Fallback if CF Offline or No Keys| FallbackFlux
-    CloudflareAPI -->|Binary Image or Base64 Data URI| P6
-    FallbackFlux -.->|Binary Image Data| P6
-    P6 -->|Illustrated Panel URL or Avatar URI| P5
-    P5 -->|Render Dynamic Comic Strip Grid & Speech Bubbles| Creator
-
-    Creator -->|Scene Edit or Change Request| P8
-    P5 -->|Active Script State| P8
-    P8 -->|Revision Message Payload| P2
-    Creator -->|Manual Script Editor Edits| P5
-    P5 -->|Save Script Edits| P2
-    P5 <-->|Synchronize State & Cache Images| D1
+    F --> H["🖼️ 6. Visual Comic Strip Reader with Speech Bubbles"]
+    G --> H
+    H --> I["✏️ 7. Live Edit Script, Modify Panels or Request Revisions"]
+    I -.->|Targeted Panel Revision| B
 ```
 
 ---
