@@ -45,28 +45,38 @@ The **Black Orange Talent AI Creative Studio** is a dual-format creative suite d
 ┌────────────────────────────────────────────────────────────────────────┐
 │                   React + Vite + Tailwind CSS SPA                      │
 │  - Multi-Product Switcher (Story vs. Comic Studio)                     │
-│  - Collapsible Sidebar with Full-Width Workspace Expansion             │
+│  - Voice Dictation Mic 🎙️ (useAudioRecorder + Web Speech Live Preview)  │
+│  - Audiobook Player Bar 🎧 (Play/Pause, Voice Selector, Speed, MP3 DL) │
+│  - Visual Comic Strip Reader & Dialogue Voicing 🗣️                     │
 │  - Consolidated Right-Side Generator Capsule (Styles, Models, Revise)  │
-│  - Visual Comic Strip Reader & Speech Bubble Dialogue Overlays         │
 │  - Real-Time Token Streaming (SSE) & Interactive Script Editor         │
 └───────────────────────────────────┬────────────────────────────────────┘
-                                    │ HTTP & SSE Streaming
+                                    │ HTTP, SSE & Audio Streams
                                     ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │                         FastAPI Backend (8080)                         │
 │  - Multi-Tenant Session Isolation (UUID-keyed state store)             │
 │  - Real-Time SSE Endpoints (/api/generate-stream, /api/revise-stream)  │
+│  - Neural Audio Router (/api/stt/transcribe, /api/tts/synthesize)      │
 │  - Google ADK InMemoryRunner with Gemini Flash Agents                  │
 │  - Image Generation Router (/api/generate-image)                       │
-└───────────────────┬────────────────────────────────┬───────────────────┘
-                    │                                │
-                    ▼                                ▼
+└───────────────┬───────────────────────────────┬────────────────────────┘
+                │                               │
+                ▼                               ▼
 ┌──────────────────────────────────────┐ ┌───────────────────────────────┐
-│ Cloudflare Workers AI (Free Tier)    │ │ Zero-Config Free Flux Engine  │
-│ • @cf/black-forest-labs/flux-schnell │ │ • Instant serverless pipeline │
-│ • @cf/stabilityai/sdxl-base-1.0      │ │ • Zero API key needed backup  │
-│ • 10,000 Neurons/Day allocation      │ │ • 100% reliable fallback      │
-└──────────────────────────────────────┘ └───────────────────────────────┘
+│ Cloudflare Workers AI (Free Tier)    │ │ Edge-TTS Neural Voice Engine  │
+│ • @cf/openai/whisper-large-v3-turbo  │ │ • Microsoft Azure voices      │
+│ • @cf/black-forest-labs/flux-schnell │ │ • Christopher, Guy, Jenny     │
+│ • @cf/stabilityai/sdxl-base-1.0      │ │ • Sonia, Eric (Villain voice) │
+│ • 10,000 Neurons/Day allocation      │ │ • 100% UNLIMITED & $0.00 Free │
+└──────────────────┬───────────────────┘ └───────────────────────────────┘
+                   │
+                   ▼ (Fallback)
+┌──────────────────────────────────────┐
+│ Zero-Config Free Flux Engine         │
+│ • Instant serverless image pipeline  │
+│ • Zero API key needed backup         │
+└──────────────────────────────────────┘
 ```
 
 ---
@@ -79,12 +89,14 @@ Simple, step-by-step visual workflows showing how each creative product operates
 
 ```mermaid
 flowchart TD
-    A["👤 1. User Enters Topic or Picks Suggestion"] --> B["⚡ 2. FastAPI Backend Routes Request"]
-    B --> C["🧠 3. Google Gemini Flash Generates Story"]
-    C --> D["📡 4. Real-Time Token Streaming (SSE) to Studio"]
-    D --> E["📖 5. Formats Title, Characters, Chapters & Moral"]
-    E --> F["✏️ 6. Read, Edit Directly or Request Revisions"]
-    F -.->|New Change Request| B
+    A["👤 1. User Dictates Voice (Mic) or Types Story Topic"] --> B["🎙️ 2. STT Engine (Cloudflare Whisper / Web Speech)"]
+    B --> C["⚡ 3. FastAPI Backend Routes Request to Agent"]
+    C --> D["🧠 4. Google Gemini Flash Generates Story"]
+    D --> E["📡 5. Real-Time Token Streaming (SSE) to Studio"]
+    E --> F["📖 6. Formats Title, Characters, Chapters & Moral"]
+    F --> G["🎧 7. Neural Audiobook Narration (Edge-TTS Christopher / Sonia)"]
+    F --> H["✏️ 8. Read, Edit Directly or Request Voice Revisions"]
+    H -.->|New Change Request| C
 ```
 
 ---
@@ -93,10 +105,10 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["👤 1. User Enters Prompt, Selects Art Style & Model"] --> B["🧠 2. Gemini AI Writes 5-6 Panel Comic Script"]
-    B --> C["✂️ 3. Script Parser Extracts Camera Angles, Dialogues & SFX"]
+    A["👤 1. Creator Dictates Plot, Selects Art Style & Model"] --> B["🧠 2. Gemini AI Writes 5-6 Panel Comic Script"]
+    B --> C["✂️ 3. Script Parser Extracts Angles, Dialogues & SFX"]
 
-    C --> D["🔊 4. Web Audio Synthesizer Plays Sound Effects (BAM! ZAP!)"]
+    C --> D["🗣️ 4. Character Dialogue Voicing (TTS) + Comic SFX (BAM! ZAP!)"]
     C --> E["🎨 5. Illustrate Panels & Character Avatars"]
 
     E --> F["⚡ Cloudflare Workers AI (Flux / SDXL)"]
@@ -104,7 +116,7 @@ flowchart TD
 
     F --> H["🖼️ 6. Visual Comic Strip Reader with Speech Bubbles"]
     G --> H
-    H --> I["✏️ 7. Live Edit Script, Modify Panels or Request Revisions"]
+    H --> I["✏️ 7. Live Edit Panels, Re-voice Lines or Voice-Revise"]
     I -.->|Targeted Panel Revision| B
 ```
 
@@ -114,12 +126,13 @@ flowchart TD
 
 ```
 BOT_RAG/
-├── DFD_DIAGRAMS.md          # Comprehensive Data Flow Diagrams & Data Dictionaries
+├── DFD_DIAGRAMS.md          # Comprehensive Data Flow Diagrams & Audio Pipelines
 ├── agent.py                 # Google ADK agent prompts (comic_agent & story_agent)
+├── audio_service.py         # Neural Audio Pipeline (Cloudflare Whisper STT & Edge-TTS)
 ├── image_generator.py       # Cloudflare Workers AI & Free Flux image pipeline
-├── server.py                # FastAPI backend (SSE streaming, state, image API)
+├── server.py                # FastAPI backend (SSE streaming, audio endpoints, image API)
 ├── run_web.py               # Backend entry launcher script with auto-reload
-├── requirements.txt         # Production Python dependencies
+├── requirements.txt         # Production Python dependencies (includes edge-tts)
 ├── .env.example             # Template for API keys and Cloudflare settings
 ├── .gitignore               # Clean git ignore patterns
 │
@@ -128,7 +141,7 @@ BOT_RAG/
 │   │   ├── components/      # VisualComicStrip, GeneratorCapsule, StoryMiddlePane, etc.
 │   │   ├── context/         # ThemeContext (Dark / Light mode)
 │   │   ├── services/        # API service and SSE streaming consumer
-│   │   └── utils/           # Markdown & scene parsers
+│   │   └── utils/           # useAudioRecorder hook, soundEffects, scene parsers
 │   ├── public/              # Static assets (logo.png, robot_hero.jpg, favicon)
 │   └── package.json         # Vite + React dependencies & scripts
 │
@@ -227,6 +240,9 @@ Once built, visit `http://127.0.0.1:8080/` or `http://127.0.0.1:8080/app` to exp
 | `POST` | `/api/generate` | Standard JSON story/comic script generation |
 | `POST` | `/api/revise-stream` | Real-time SSE streaming story revision |
 | `POST` | `/api/revise` | Standard JSON story revision |
+| `POST` | `/api/stt/transcribe` | Transcribes audio via Cloudflare Whisper Large v3 Turbo with fallback |
+| `POST` | `/api/tts/synthesize` | Streams neural MP3 speech audio via edge-tts (Christopher, Sonia, Guy, Jenny) |
+| `GET` | `/api/tts/voices` | Returns curated studio voice profiles and character assignments |
 | `POST` | `/api/generate-image` | Generates comic panel illustrations via Cloudflare Workers AI or fallback engine |
 | `GET` | `/api/image-styles` | Lists available comic art styles and AI models |
 | `GET` | `/api/cloudflare/status`| Checks Cloudflare credentials and free tier status |
