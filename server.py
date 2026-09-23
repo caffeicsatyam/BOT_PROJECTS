@@ -5,7 +5,7 @@ import asyncio
 from typing import Optional, Dict
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, PlainTextResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -28,6 +28,14 @@ from agent import root_agent, comic_agent, story_agent
 
 # Cloudflare & Free Image Generation Engine
 from image_generator import generate_comic_image, STYLE_PRESETS, CLOUDFLARE_MODELS
+
+
+from audio_service import (
+    transcribe_audio,
+    synthesize_speech_stream,
+    get_available_voices,
+    VOICE_PROFILES
+)
 
 # ── APP INITIALIZATION ──
 app = FastAPI(
@@ -92,6 +100,12 @@ class ImageGenerateRequest(BaseModel):
 class CloudflareConfigRequest(BaseModel):
     account_id: Optional[str] = None
     api_token: Optional[str] = None
+
+class SynthesizeRequest(BaseModel):
+    text: str
+    voice: Optional[str] = "en-US-ChristopherNeural"
+    rate: Optional[str] = "+0%"
+    pitch: Optional[str] = "+0Hz"
 
 
 # ── MULTI-TENANT SESSION STORE ──
@@ -379,6 +393,64 @@ def generate_image(req: ImageGenerateRequest):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── NEURAL AUDIO ENDPOINTS (STT & TTS) ──
+
+@app.post("/api/stt/transcribe")
+async def transcribe_speech(
+    file: UploadFile = File(...),
+    account_id: Optional[str] = None,
+    api_token: Optional[str] = None
+):
+    """
+    Speech-to-Text endpoint:
+    Accepts browser-recorded audio (WebM, WAV, MP3) and transcribes using
+    Cloudflare Workers AI Whisper (@cf/openai/whisper-large-v3-turbo).
+    """
+    try:
+        audio_bytes = await file.read()
+        acc_id = account_id or GLOBAL_CF_CONFIG["account_id"] or os.getenv("CLOUDFLARE_ACCOUNT_ID")
+        token = api_token or GLOBAL_CF_CONFIG["api_token"] or os.getenv("CLOUDFLARE_API_KEY") or os.getenv("CLOUDFLARE_API_TOKEN")
+
+        result = transcribe_audio(audio_bytes=audio_bytes, account_id=acc_id, api_token=token)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/tts/synthesize")
+async def synthesize_speech(req: SynthesizeRequest):
+    """
+    Neural Text-to-Speech endpoint:
+    Streams high-fidelity MP3 speech chunks via edge-tts with zero token limits.
+    """
+    text = req.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Text to synthesize cannot be empty.")
+
+    try:
+        return StreamingResponse(
+            synthesize_speech_stream(
+                text=text,
+                voice=req.voice or "en-US-ChristopherNeural",
+                rate=req.rate or "+0%",
+                pitch=req.pitch or "+0Hz"
+            ),
+            media_type="audio/mpeg",
+            headers={
+                "Cache-Control": "no-cache",
+                "Content-Disposition": "inline; filename=speech.mp3"
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/tts/voices")
+def list_tts_voices():
+    """Returns list of curated studio voice profiles."""
+    return get_available_voices()
 
 
 # ── STATIC ASSETS & SINGLE PAGE APPLICATION SERVING ──

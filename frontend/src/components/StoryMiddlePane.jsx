@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Copy, 
   Check, 
@@ -10,10 +10,16 @@ import {
   Award, 
   FileEdit, 
   Image as ImageIcon, 
-  FileText
+  FileText,
+  Play,
+  Pause,
+  Headphones,
+  RotateCw,
+  Volume2
 } from 'lucide-react';
 import VisualComicStrip from './VisualComicStrip';
 import { comicSound } from '../utils/soundEffects';
+import { synthesizeSpeechBlob } from '../services/api';
 
 export default function StoryMiddlePane({
   product,
@@ -31,6 +37,77 @@ export default function StoryMiddlePane({
   const [copied, setCopied] = useState(false);
   const isComic = product.slug === 'comic';
   const [viewMode, setViewMode] = useState('visual');
+
+  // Neural TTS Audiobook Narration State
+  const audioRef = useRef(null);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [isSynthesizing, setIsSynthesizing] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState('en-US-ChristopherNeural');
+  const [speechRate, setSpeechRate] = useState('+0%');
+  const [audioUrl, setAudioUrl] = useState(null);
+  const [cachedKey, setCachedKey] = useState('');
+
+  // Stop audio on unmount or raw text change
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  const handleTogglePlay = async () => {
+    if (!product.rawText) return;
+
+    const currentKey = `${product.rawText.length}_${selectedVoice}_${speechRate}`;
+
+    // If already playing, pause it
+    if (isPlayingAudio && audioRef.current) {
+      audioRef.current.pause();
+      setIsPlayingAudio(false);
+      return;
+    }
+
+    // If cached audio matches current text & settings, resume
+    if (audioUrl && cachedKey === currentKey && audioRef.current) {
+      audioRef.current.play();
+      setIsPlayingAudio(true);
+      return;
+    }
+
+    // Synthesize new audio via backend edge-tts
+    try {
+      setIsSynthesizing(true);
+      const url = await synthesizeSpeechBlob({
+        text: product.rawText,
+        voice: selectedVoice,
+        rate: speechRate
+      });
+
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+
+      const audio = new Audio(url);
+      audio.onended = () => setIsPlayingAudio(false);
+      audio.onerror = () => {
+        setIsPlayingAudio(false);
+        setIsSynthesizing(false);
+      };
+
+      audioRef.current = audio;
+      setAudioUrl(url);
+      setCachedKey(currentKey);
+      await audio.play();
+      setIsPlayingAudio(true);
+    } catch (err) {
+      console.error('Audio synthesis failed:', err);
+      alert('Could not synthesize speech: ' + (err.message || 'Unknown error'));
+    } finally {
+      setIsSynthesizing(false);
+    }
+  };
 
   const handleCopyClick = () => {
     onCopy();
@@ -167,6 +244,107 @@ export default function StoryMiddlePane({
           </div>
         )}
       </div>
+
+      {/* ── NEURAL AUDIOBOOK NARRATION BAR (TTS) ── */}
+      {hasContent && !isComic && (
+        <div className="mb-5 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-orange-500/[0.08] via-amber-500/[0.05] to-transparent border border-orange-500/25 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3 transition">
+          <div className="flex items-center gap-3">
+            {/* Play/Pause Button */}
+            <button
+              type="button"
+              onClick={handleTogglePlay}
+              disabled={isSynthesizing || !product.rawText}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-md shadow-orange-500/25 active:scale-95 transition cursor-pointer disabled:opacity-50"
+            >
+              {isSynthesizing ? (
+                <>
+                  <RotateCw className="w-4 h-4 animate-spin" />
+                  <span>Synthesizing...</span>
+                </>
+              ) : isPlayingAudio ? (
+                <>
+                  <Pause className="w-4 h-4 fill-white" />
+                  <span>Pause Story</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4 fill-white" />
+                  <span>Listen to Story</span>
+                </>
+              )}
+            </button>
+
+            {/* Speaking Status / Equalizer */}
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200">
+              <Headphones className="w-4 h-4 text-orange-500" />
+              <span>{isPlayingAudio ? 'Narrating Audiobook' : 'Studio Neural Narration'}</span>
+              {isPlayingAudio && (
+                <span className="flex items-end gap-0.5 h-3.5 ml-1">
+                  <span className="w-1 bg-orange-500 rounded-full animate-bounce h-2" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1 bg-orange-500 rounded-full animate-bounce h-3.5" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1 bg-orange-500 rounded-full animate-bounce h-2.5" style={{ animationDelay: '300ms' }} />
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Voice Selector, Speed, and Download */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Voice Dropdown */}
+            <div className="flex items-center gap-1.5 text-xs">
+              <span className="text-slate-500 dark:text-slate-400 font-medium text-[11px]">Voice:</span>
+              <select
+                value={selectedVoice}
+                onChange={(e) => setSelectedVoice(e.target.value)}
+                disabled={isPlayingAudio || isSynthesizing}
+                className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-white dark:bg-[#161622] border border-black/10 dark:border-white/10 text-slate-800 dark:text-slate-200 outline-none focus:border-orange-500 cursor-pointer shadow-sm disabled:opacity-50"
+              >
+                <option value="en-US-ChristopherNeural">Christopher (Epic Male)</option>
+                <option value="en-GB-SoniaNeural">Sonia (Classic British)</option>
+                <option value="en-US-GuyNeural">Guy (Energetic Male)</option>
+                <option value="en-US-JennyNeural">Jenny (Vibrant Female)</option>
+              </select>
+            </div>
+
+            {/* Speed Selector */}
+            <div className="flex items-center gap-1 text-xs">
+              <span className="text-slate-500 dark:text-slate-400 font-medium text-[11px]">Speed:</span>
+              {[
+                { label: '0.8x', val: '-15%' },
+                { label: '1.0x', val: '+0%' },
+                { label: '1.2x', val: '+20%' }
+              ].map((s) => (
+                <button
+                  key={s.label}
+                  type="button"
+                  onClick={() => setSpeechRate(s.val)}
+                  disabled={isPlayingAudio || isSynthesizing}
+                  className={`px-2 py-0.5 rounded text-[11px] font-bold transition cursor-pointer border ${
+                    speechRate === s.val
+                      ? 'bg-orange-500 text-white border-orange-600'
+                      : 'bg-white dark:bg-[#161622] text-slate-600 dark:text-slate-300 border-black/10 dark:border-white/10 hover:border-orange-500'
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Download MP3 */}
+            {audioUrl && (
+              <a
+                href={audioUrl}
+                download={`${product.title || 'ai_story'}_audiobook.mp3`}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-white/[0.05] border border-black/10 dark:border-white/10 hover:border-orange-500 hover:text-orange-500 transition shadow-sm"
+                title="Download Narrated MP3 Audiobook"
+              >
+                <Download className="w-3 h-3" />
+                <span>Save MP3</span>
+              </a>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── CONTENT AREA OR EMPTY STATE ── */}
       {!hasContent ? (

@@ -28,9 +28,14 @@ The **Black Orange Talent AI Creative Studio** is a dual-format creative suite d
    - **Visual Comic Strip Reader**: Illustrates panels dynamically using **Cloudflare Workers AI Free Models** (FLUX.1 [schnell], SDXL Base 1.0, SDXL Lightning) and zero-config free fallbacks.
    - **6 Curated Comic Art Styles**: Modern Comic (Marvel/DC), Manga / Shonen, Vintage Pop-Art (Roy Lichtenstein), 3D Animated (Pixar Style), Graphic Novel Noir, and Storybook Watercolor.
    - **Character Cast Portraits**: One-click character avatar generation matching the chosen comic art style.
+   - **Panel & Dialogue Voice Acting (TTS)**: Multi-character neural voice playback with speech bubble read-aloud buttons and panel narration.
 
 2. **AI Story Generator**:
    - Rich narrative chapter storytelling with thoughtful prose, character arcs, sensory details, and positive moral lessons.
+   - **Audiobook Player Bar (TTS)**: High-fidelity neural story narration (`edge-tts`) with Christopher (Epic Narrator), Sonia (Classic British), Guy, and Jenny, speed controls (0.8x, 1x, 1.2x), and direct `.mp3` download.
+
+3. **Voice Studio Director (STT)**:
+   - **Hands-Free Voice Dictation**: Speak prompts or revision instructions using **Cloudflare Workers AI Whisper Large v3 Turbo** (`@cf/openai/whisper-large-v3-turbo`) with real-time Web Speech live preview.
 
 ---
 

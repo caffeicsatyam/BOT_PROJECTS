@@ -116,3 +116,57 @@ export async function streamStory({
     onError?.(err);
   }
 }
+
+// ── NEURAL AUDIO SERVICES (STT & TTS) ──
+
+/**
+ * Sends recorded microphone audio to the backend Whisper STT endpoint
+ */
+export async function transcribeAudio(audioBlob) {
+  const formData = new FormData();
+  formData.append('file', audioBlob, 'recording.webm');
+
+  const res = await fetch(`${API_BASE}/stt/transcribe`, {
+    method: 'POST',
+    body: formData
+  });
+
+  if (!res.ok) {
+    throw new Error(`STT request failed: ${res.statusText}`);
+  }
+
+  return await res.json();
+}
+
+/**
+ * Retrieves the available curated neural voices from edge-tts
+ */
+export async function fetchTtsVoices() {
+  try {
+    const res = await fetch(`${API_BASE}/tts/voices`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.warn('Failed to fetch TTS voices:', err);
+    return { voices: [] };
+  }
+}
+
+/**
+ * Synthesizes speech using edge-tts and returns an Audio object URL
+ */
+export async function synthesizeSpeechBlob({ text, voice = 'en-US-ChristopherNeural', rate = '+0%', pitch = '+0Hz' }) {
+  const res = await fetch(`${API_BASE}/tts/synthesize`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text, voice, rate, pitch })
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(errText || `TTS failed with status ${res.status}`);
+  }
+
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}

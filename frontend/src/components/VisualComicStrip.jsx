@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Sparkles, 
   Image as ImageIcon, 
@@ -6,12 +6,14 @@ import {
   Download, 
   Maximize2, 
   Users, 
-  Award,
-  BookOpen,
-  Volume2,
-  VolumeX
+  Award, 
+  BookOpen, 
+  Volume2, 
+  VolumeX,
+  Headphones
 } from 'lucide-react';
 import { comicSound } from '../utils/soundEffects';
+import { synthesizeSpeechBlob } from '../services/api';
 
 export default function VisualComicStrip({
   product,
@@ -27,10 +29,81 @@ export default function VisualComicStrip({
   const [soundEnabled, setSoundEnabled] = useState(comicSound.enabled);
   const [recentlyPlayedSfx, setRecentlyPlayedSfx] = useState(null);
 
+  // Neural TTS Dialogue & Panel Playback State
+  const [playingDlgId, setPlayingDlgId] = useState(null);
+  const [playingPanelIdx, setPlayingPanelIdx] = useState(null);
+  const comicAudioRef = useRef(null);
+
   useEffect(() => {
     const unsub = comicSound.onToggle(setSoundEnabled);
-    return unsub;
+    return () => {
+      unsub();
+      if (comicAudioRef.current) {
+        comicAudioRef.current.pause();
+        comicAudioRef.current = null;
+      }
+    };
   }, []);
+
+  // Voice single speech bubble line
+  const handlePlayDialogue = async (dlgText, dIdx, pIdx) => {
+    const id = `${pIdx}_${dIdx}`;
+    if (playingDlgId === id) {
+      if (comicAudioRef.current) comicAudioRef.current.pause();
+      setPlayingDlgId(null);
+      return;
+    }
+
+    try {
+      setPlayingDlgId(id);
+      if (comicAudioRef.current) comicAudioRef.current.pause();
+
+      const voice = dIdx % 2 === 0 ? 'en-US-GuyNeural' : 'en-US-JennyNeural';
+      const url = await synthesizeSpeechBlob({ text: dlgText, voice });
+
+      const audio = new Audio(url);
+      audio.onended = () => setPlayingDlgId(null);
+      audio.onerror = () => setPlayingDlgId(null);
+      comicAudioRef.current = audio;
+      await audio.play();
+    } catch (err) {
+      console.warn('Dialogue TTS error:', err);
+      setPlayingDlgId(null);
+    }
+  };
+
+  // Voice whole panel (Caption + Dialogues)
+  const handlePlayPanel = async (pIdx, dialogues, description) => {
+    if (playingPanelIdx === pIdx) {
+      if (comicAudioRef.current) comicAudioRef.current.pause();
+      setPlayingPanelIdx(null);
+      return;
+    }
+
+    try {
+      setPlayingPanelIdx(pIdx);
+      if (comicAudioRef.current) comicAudioRef.current.pause();
+
+      const narrationText = [
+        description ? `Panel ${pIdx + 1}: ${description}` : '',
+        dialogues && dialogues.length > 0 ? dialogues.join('. ') : ''
+      ].filter(Boolean).join('. ');
+
+      const url = await synthesizeSpeechBlob({
+        text: narrationText,
+        voice: 'en-US-ChristopherNeural'
+      });
+
+      const audio = new Audio(url);
+      audio.onended = () => setPlayingPanelIdx(null);
+      audio.onerror = () => setPlayingPanelIdx(null);
+      comicAudioRef.current = audio;
+      await audio.play();
+    } catch (err) {
+      console.warn('Panel narration error:', err);
+      setPlayingPanelIdx(null);
+    }
+  };
 
   const handleToggleSound = () => {
     const newState = comicSound.toggleSound();
@@ -274,6 +347,20 @@ export default function VisualComicStrip({
                 {/* Panel Action Buttons */}
                 <div className="flex items-center gap-1.5">
                   <button
+                    type="button"
+                    onClick={() => handlePlayPanel(idx, dialogues, description)}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer border ${
+                      playingPanelIdx === idx
+                        ? 'bg-orange-500 text-white border-orange-600 animate-pulse'
+                        : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
+                    }`}
+                    title="Listen to panel narration and dialogues (TTS)"
+                  >
+                    <Volume2 className="w-3 h-3 text-orange-400" />
+                    <span>{playingPanelIdx === idx ? 'Playing...' : 'Voice'}</span>
+                  </button>
+
+                  <button
                     onClick={() => onGeneratePanelImage(idx, scene)}
                     disabled={isGeneratingThis}
                     className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 transition cursor-pointer disabled:opacity-50"
@@ -390,10 +477,25 @@ export default function VisualComicStrip({
                   dialogues.map((dlg, dIdx) => (
                     <div
                       key={dIdx}
-                      className="relative p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/25 border-2 border-amber-400/40 text-xs font-medium text-amber-950 dark:text-amber-100 shadow-sm leading-relaxed"
+                      className="relative p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/25 border-2 border-amber-400/40 text-xs font-medium text-amber-950 dark:text-amber-100 shadow-sm leading-relaxed flex items-start justify-between gap-2"
                     >
-                      <span className="text-amber-600 dark:text-amber-400 font-bold mr-1.5">💬</span>
-                      {dlg}
+                      <div className="flex-1">
+                        <span className="text-amber-600 dark:text-amber-400 font-bold mr-1.5">💬</span>
+                        {dlg}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handlePlayDialogue(dlg, dIdx, idx)}
+                        className={`shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold transition cursor-pointer border ${
+                          playingDlgId === `${idx}_${dIdx}`
+                            ? 'bg-orange-500 text-white border-orange-600 animate-pulse'
+                            : 'bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-800/60 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-700/50'
+                        }`}
+                        title="Click to hear character speak this dialogue"
+                      >
+                        <Volume2 className="w-3 h-3" />
+                        <span>{playingDlgId === `${idx}_${dIdx}` ? 'Playing...' : 'Speak'}</span>
+                      </button>
                     </div>
                   ))
                 ) : (

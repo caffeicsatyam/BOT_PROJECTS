@@ -9,8 +9,11 @@ import {
   Sparkles, 
   RotateCw,
   ChevronDown,
-  Cloud
+  Cloud,
+  Mic,
+  MicOff
 } from 'lucide-react';
+import { useAudioRecorder } from '../utils/useAudioRecorder';
 
 const COMIC_STYLES = [
   { id: 'comic-modern', label: 'Modern Comic (Marvel/DC)' },
@@ -44,6 +47,21 @@ export default function GeneratorCapsule({
   const isComic = product.slug === 'comic';
   const hasPanels = product.scenes && product.scenes.length > 0;
 
+  // Voice Dictation (STT) hooks
+  const promptRecorder = useAudioRecorder({
+    onTranscript: (spokenText) => {
+      setTopic((prev) => (prev ? `${prev} ${spokenText}` : spokenText));
+    },
+    onError: (err) => console.warn('[Prompt Voice Error]:', err)
+  });
+
+  const revisionRecorder = useAudioRecorder({
+    onTranscript: (spokenText) => {
+      setRevisionText((prev) => (prev ? `${prev} ${spokenText}` : spokenText));
+    },
+    onError: (err) => console.warn('[Revision Voice Error]:', err)
+  });
+
   const handleReviseSubmit = (e) => {
     e.preventDefault();
     if (!revisionText.trim() || isRevising) return;
@@ -74,20 +92,66 @@ export default function GeneratorCapsule({
         {/* Capsule Scrollable Body */}
         <div className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-4">
           
-          {/* Topic Input Field */}
+          {/* Topic Input Field with Voice STT */}
           <div>
-            <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-              <Lightbulb className="w-3.5 h-3.5 text-[#ff7b2e]" />
-              <span>Prompt &amp; Topic</span>
-            </label>
-            <textarea
-              rows={3}
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              disabled={isGenerating}
-              placeholder={product.placeholder}
-              className="w-full bg-slate-50 dark:bg-white/[0.03] border border-black/[0.08] dark:border-white/[0.1] focus:border-[#ff7b2e] rounded-xl p-3 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none resize-none transition focus:ring-1 focus:ring-[#ff7b2e] disabled:opacity-50"
-            />
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                <Lightbulb className="w-3.5 h-3.5 text-[#ff7b2e]" />
+                <span>Prompt &amp; Topic</span>
+              </label>
+
+              {/* Voice Dictation Button */}
+              <button
+                type="button"
+                onClick={promptRecorder.toggleRecording}
+                disabled={isGenerating || promptRecorder.isProcessing}
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide transition cursor-pointer border ${
+                  promptRecorder.isRecording
+                    ? 'bg-rose-500 text-white border-rose-600 animate-pulse shadow-sm shadow-rose-500/30'
+                    : promptRecorder.isProcessing
+                    ? 'bg-amber-500/10 text-amber-600 border-amber-500/30'
+                    : 'bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 border-black/10 dark:border-white/10 hover:border-orange-500 hover:text-orange-500'
+                }`}
+                title={promptRecorder.isRecording ? 'Click to stop voice recording' : 'Dictate prompt with Voice (STT)'}
+              >
+                {promptRecorder.isRecording ? (
+                  <>
+                    <Mic className="w-3 h-3 text-white animate-bounce" />
+                    <span>Listening...</span>
+                  </>
+                ) : promptRecorder.isProcessing ? (
+                  <>
+                    <RotateCw className="w-3 h-3 animate-spin" />
+                    <span>Transcribing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Mic className="w-3 h-3" />
+                    <span>Voice Mic</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="relative">
+              <textarea
+                rows={3}
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                disabled={isGenerating}
+                placeholder={promptRecorder.isRecording ? 'Speak now into your microphone...' : product.placeholder}
+                className={`w-full bg-slate-50 dark:bg-white/[0.03] border rounded-xl p-3 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none resize-none transition focus:ring-1 focus:ring-[#ff7b2e] disabled:opacity-50 ${
+                  promptRecorder.isRecording 
+                    ? 'border-rose-400 ring-2 ring-rose-400/20' 
+                    : 'border-black/[0.08] dark:border-white/[0.1] focus:border-[#ff7b2e]'
+                }`}
+              />
+              {promptRecorder.livePreview && (
+                <div className="text-[11px] text-orange-600 dark:text-orange-400 font-medium px-2 py-1 italic animate-pulse">
+                  Live: "{promptRecorder.livePreview}"
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Quick Topic Chips */}
@@ -186,20 +250,59 @@ export default function GeneratorCapsule({
             </div>
           )}
 
-          {/* AI Revision Assistant */}
+          {/* AI Revision Assistant with Voice Director Mode */}
           <div className="pt-2 border-t border-black/[0.08] dark:border-white/[0.08]">
-            <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-              <RefreshCw className="w-3.5 h-3.5 text-[#ff7b2e]" />
-              <span>AI Story Doctor (Revise)</span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                <RefreshCw className="w-3.5 h-3.5 text-[#ff7b2e]" />
+                <span>AI Story Doctor (Revise)</span>
+              </label>
+
+              {/* Voice Revision Button */}
+              <button
+                type="button"
+                onClick={revisionRecorder.toggleRecording}
+                disabled={isRevising || isGenerating || revisionRecorder.isProcessing}
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide transition cursor-pointer border ${
+                  revisionRecorder.isRecording
+                    ? 'bg-rose-500 text-white border-rose-600 animate-pulse'
+                    : revisionRecorder.isProcessing
+                    ? 'bg-amber-500/10 text-amber-600 border-amber-500/30'
+                    : 'bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 border-black/10 dark:border-white/10 hover:border-orange-500 hover:text-orange-500'
+                }`}
+                title={revisionRecorder.isRecording ? 'Click to stop voice revision' : 'Speak revision directions (STT)'}
+              >
+                {revisionRecorder.isRecording ? (
+                  <>
+                    <Mic className="w-3 h-3 text-white animate-bounce" />
+                    <span>Listening...</span>
+                  </>
+                ) : revisionRecorder.isProcessing ? (
+                  <>
+                    <RotateCw className="w-3 h-3 animate-spin" />
+                    <span>Transcribing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Mic className="w-3 h-3" />
+                    <span>Voice</span>
+                  </>
+                )}
+              </button>
+            </div>
+
             <form onSubmit={handleReviseSubmit} className="space-y-2">
               <input
                 type="text"
                 value={revisionText}
                 onChange={(e) => setRevisionText(e.target.value)}
                 disabled={isRevising || isGenerating}
-                placeholder="e.g. 'Add a curious cat sidekick'..."
-                className="w-full bg-slate-50 dark:bg-white/[0.03] border border-black/[0.08] dark:border-white/[0.1] focus:border-[#ff7b2e] rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition disabled:opacity-50"
+                placeholder={revisionRecorder.isRecording ? 'Speak revision (e.g. "Add a talking robot pet")...' : "e.g. 'Add a curious cat sidekick'..."}
+                className={`w-full bg-slate-50 dark:bg-white/[0.03] border rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition disabled:opacity-50 ${
+                  revisionRecorder.isRecording
+                    ? 'border-rose-400 ring-2 ring-rose-400/20'
+                    : 'border-black/[0.08] dark:border-white/[0.1] focus:border-[#ff7b2e]'
+                }`}
               />
               <button
                 type="submit"
