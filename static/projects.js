@@ -15,6 +15,102 @@
   if (window.__products_studio_loaded__) return;
   window.__products_studio_loaded__ = true;
 
+  // ── CLIENT-SIDE WEB AUDIO SFX SYNTHESIZER (100% Free & Local) ──
+  let staticAudioCtx = null;
+  window.playStaticSfx = function(sfxText) {
+    try {
+      if (!staticAudioCtx && typeof window !== "undefined") {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) staticAudioCtx = new AudioCtx();
+      }
+      if (staticAudioCtx && staticAudioCtx.state === "suspended") {
+        staticAudioCtx.resume();
+      }
+      if (!staticAudioCtx) return;
+
+      const ctx = staticAudioCtx;
+      const now = ctx.currentTime;
+      const text = (sfxText || "").toUpperCase();
+
+      if (/THOOM|THUNDER|BOOM|BLAST|ROAR|RUMBLE|KRAK/.test(text)) {
+        // Deep thunder rumble
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(100, now);
+        osc.frequency.exponentialRampToValueAtTime(26, now + 0.45);
+        gain.gain.setValueAtTime(0.6, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.46);
+      } else if (/ZAP|PEW|LASER|VOLT|SHOCK|SIZZLE/.test(text)) {
+        // Laser zap
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(1000, now);
+        osc.frequency.exponentialRampToValueAtTime(70, now + 0.18);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.19);
+      } else if (/WHOOSH|SWOOSH|ZOOM|VROOOM|DASH|SKRRRT/.test(text)) {
+        // Swoosh noise sweep
+        const bufferSize = ctx.sampleRate * 0.22;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = "bandpass";
+        filter.frequency.setValueAtTime(220, now);
+        filter.frequency.exponentialRampToValueAtTime(1400, now + 0.1);
+        filter.frequency.exponentialRampToValueAtTime(280, now + 0.22);
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.linearRampToValueAtTime(0.4, now + 0.1);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        noise.start(now);
+      } else if (/POP|BING|DING|CHIME|MAGIC|PING/.test(text)) {
+        // Bright chime
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(587, now);
+        osc.frequency.setValueAtTime(880, now + 0.08);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.31);
+      } else {
+        // Punch / BAM / POW Impact
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(35, now + 0.2);
+        gain.gain.setValueAtTime(0.7, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.23);
+      }
+    } catch (err) {
+      console.error("SFX error:", err);
+    }
+  };
+
   // ── 1. DEFINITION OF THE 2 PRODUCTS ──
   const PRODUCTS = [
     {
@@ -134,7 +230,8 @@
   // ── PARSE MARKDOWN INTO DATA MODEL ──
   function parseProductMarkdown(text, fallbackTopic) {
     if (!text) return {};
-    const lines = text.split("\n");
+    const normalizedText = text.replace(/(?<!^)(?<!\n)(?=(?:\*{0,2}|#{1,4}\s*)(?:Scene|Chapter|Panel)\s*\d+[:.\s*-])/gi, '\n');
+    const lines = normalizedText.split("\n");
     let title = "Creative Production";
     let moral = "Every experience teaches a valuable lesson.";
     const characters = [];
@@ -165,19 +262,28 @@
           });
         }
       } else if ((currentSection === "comic scenes" || currentSection === "scenes" || currentSection === "story") && line) {
-        const sceneMatch = line.match(/^(?:Scene|Panel|Chapter)\s*(\d+):?\s*(.*)$/i);
+        // Match Scene 1:, **Scene 1:**, ### Scene 1:, Panel 1:, Chapter 1:, etc.
+        const sceneMatch = line.match(/^(?:\*{0,2}|#{1,4}\s*)(?:Scene|Panel|Chapter)\s*(\d+)\*{0,2}[:.\s*-]*(.*)$/i);
         if (sceneMatch) {
           if (currentScene) scenes.push(currentScene);
+          const rawHeading = (sceneMatch[2] || "").replace(/\*/g, "").trim();
           currentScene = {
             num: parseInt(sceneMatch[1], 10),
-            heading: sceneMatch[2] ? sceneMatch[2].trim() : `Section ${sceneMatch[1]}`,
+            heading: rawHeading || `Panel ${sceneMatch[1]}`,
             content: ""
           };
         } else if (currentScene) {
-          currentScene.content = (currentScene.content ? currentScene.content + " " : "") + line;
+          // Clean empty sound effect tags like "- **Sound Effect:**"
+          let cleanLine = line
+            .replace(/[-*•]?\s*\*\*Sound\s*Effects?:?\*\*\s*:?/gi, '')
+            .replace(/[-*•]?\s*Sound\s*Effects?:?\s*:?/gi, '')
+            .trim();
+          if (cleanLine) {
+            currentScene.content = (currentScene.content ? currentScene.content + " " : "") + cleanLine;
+          }
         }
       } else if (currentSection === "moral" && line && !line.startsWith("#")) {
-        moral = line.trim();
+        moral = line.replace(/^["'\s*]+|["'\s*]+$/g, "").trim();
       }
     }
 
@@ -327,9 +433,14 @@
     if (comicPanelsContainer) {
       const isComic = prod.productType === "comic";
       comicPanelsContainer.innerHTML = (prod.scenes || []).map((sc, scIdx) => {
-        let content = sc.content;
+        let content = sc.content || "";
         if (isComic) {
-          content = content.replace(/\b([A-Z]{3,8}!+)\b/g, '<span class="comic-sfx">$1</span>');
+          content = content.replace(/\*\*([A-Z0-9!?-]+)\*\*/gi, (match, p1) => {
+            return `<button type="button" class="comic-sfx" onclick="window.playStaticSfx('${p1}')" title="Click to hear sound effect! 🔊">${p1}</button>`;
+          });
+          content = content.replace(/\b([A-Z0-9!?-]{3,12}!+)\b/g, (match, p1) => {
+            return `<button type="button" class="comic-sfx" onclick="window.playStaticSfx('${p1}')" title="Click to hear sound effect! 🔊">${p1}</button>`;
+          });
         }
         const existingImg = window.__comic_panel_images && window.__comic_panel_images[scIdx];
         const imgHtml = isComic ? `
@@ -564,6 +675,9 @@
     if (hash && products.some((p) => p.id === hash)) {
       return hash;
     }
+
+    return products[0].id;
+  }
 
   // ── 10. COMIC ILLUSTRATION HELPERS ──
   window.__comic_panel_images = {};

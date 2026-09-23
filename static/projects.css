@@ -796,17 +796,35 @@ body.projects-page {
 }
 
 .comic-sfx {
-  display: inline-block;
-  background: #ff4d6d;
-  color: #fff;
-  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #ffbe0b, #fb5607, #ff006e);
+  color: #ffffff;
+  font-weight: 900;
   font-style: italic;
-  font-size: 0.74rem;
-  padding: 1px 6px;
-  border-radius: 4px;
-  letter-spacing: 0.05em;
-  margin: 0 3px;
+  font-size: 0.76rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1.5px solid #fff;
+  letter-spacing: 0.06em;
+  margin: 2px 4px;
   transform: rotate(-3deg);
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(251, 86, 7, 0.45), 2px 2px 0px rgba(0, 0, 0, 0.6);
+  transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.comic-sfx:hover {
+  transform: rotate(0deg) scale(1.15);
+  box-shadow: 0 6px 16px rgba(255, 0, 110, 0.6), 3px 3px 0px rgba(0, 0, 0, 0.8);
+  border-color: #ffbe0b;
+}
+
+.comic-sfx:active {
+  transform: scale(0.92);
 }
 
 /* Moral Box */
